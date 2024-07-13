@@ -47,9 +47,8 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation("com.opencsv:opencsv:5.9")
-    implementation("androidx.room:room-runtime:2.6.1")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    annotationProcessor("androidx.room:room-compiler:2.6.1")
+
 
 
 
