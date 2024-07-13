@@ -26,6 +26,7 @@ import com.opencsv.exceptions.CsvException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class CSVDownloader {
     private static final String CSV_GIVEN_NAMES_URL_2000_2019 = "https://api.dane.gov.pl/resources/21458,imiona-nadane-dzieciom-w-polsce-w-latach-2000-2019-imie-pierwsze/csv";
@@ -41,38 +42,77 @@ public class CSVDownloader {
     );
     private static final String CSV_NAMES_LIVE_MALE_FROM_2024 = "https://api.dane.gov.pl/resources/54109,lista-imion-meskich-w-rejestrze-pesel-stan-na-19012023-imie-pierwsze/csv";
     private static final String CSV_NAMES_LIVE_FEMALE_FROM_2024 = "https://api.dane.gov.pl/resources/54110,lista-imion-zenskich-w-rejestrze-pesel-stan-na-19012024-imie-pierwsze/csv";
-
+    private static final int TIMEOUT = 30;
 
     public static void downloadCsvData(Context context, Runnable onSuccess, Runnable onFailure) {
         new Thread(() -> {
             long startTime = System.currentTimeMillis();
+            ExecutorService executor = Executors.newSingleThreadExecutor(); //
+            DatabaseHelper dbHelper = new DatabaseHelper(context);
             try {
-                DatabaseHelper dbHelper = new DatabaseHelper(context);
-
                 // Check if first name data already exists
                 if (dbHelper.isFirstNameDataEmpty()) {
-                    downloadAndInsertCSVGivenNames(dbHelper, CSV_GIVEN_NAMES_URL_2000_2019);
+                    executor.submit(() -> {
+                        try {
+                            downloadAndInsertCSVGivenNames(dbHelper, CSV_GIVEN_NAMES_URL_2000_2019);
+                        } catch (IOException | CsvException e) {
+                            e.printStackTrace();
+                            onFailure.run();
+                        }
+                    });
 
                     for (Map.Entry<String, Integer> entry : CSV_GIVEN_2020_2023_MAP.entrySet()) {
-                        downloadAndInsertCSVGivenNames(dbHelper, entry.getKey(), entry.getValue());
+                        executor.submit(() -> {
+                            try {
+                                downloadAndInsertCSVGivenNames(dbHelper, entry.getKey(), entry.getValue());
+                            } catch (IOException | CsvException e) {
+                                e.printStackTrace();
+                                onFailure.run();
+                            }
+                        });
                     }
                 }
 
                 // Check if live first name data already exists
                 if (dbHelper.isLiveFirstNameDataEmpty()) {
-                    downloadAndInsertCSVLiveNames(dbHelper, CSV_NAMES_LIVE_MALE_FROM_2024, true);
-                    downloadAndInsertCSVLiveNames(dbHelper, CSV_NAMES_LIVE_FEMALE_FROM_2024, false);
+                    executor.submit(() -> {
+                        try {
+                            downloadAndInsertCSVLiveNames(dbHelper, CSV_NAMES_LIVE_MALE_FROM_2024, true);
+                        } catch (IOException | CsvException e) {
+                            e.printStackTrace();
+                            onFailure.run();
+                        }
+                    });
+
+                    executor.submit(() -> {
+                        try {
+                            downloadAndInsertCSVLiveNames(dbHelper, CSV_NAMES_LIVE_FEMALE_FROM_2024, false);
+                        } catch (IOException | CsvException e) {
+                            e.printStackTrace();
+                            onFailure.run();
+                        }
+                    });
+                }
+
+                executor.shutdown();
+                try {
+                    if (!executor.awaitTermination(TIMEOUT, TimeUnit.MINUTES)) {
+                        executor.shutdownNow();
+                    }
+                } catch (InterruptedException e) {
+                    executor.shutdownNow();
                 }
 
                 // Notify success
                 onSuccess.run();
-            } catch (IOException | CsvException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 onFailure.run();
             }
+
             long endTime = System.currentTimeMillis();
             long elapsedTime = endTime - startTime;
-            Log.d(TAG, "Time elapsed: " + elapsedTime/1000 + "s");
+            Log.d(TAG, "Time elapsed: " + elapsedTime / 1000 + "s");
         }).start();
     }
 

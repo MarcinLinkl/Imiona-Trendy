@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
 import com.opencsv.CSVReader;
@@ -16,25 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
-
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "DatabaseHelper";
@@ -60,7 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_IS_MALE_LIVE = "is_male";
 
     // Batch size for bulk insertion
-    private static final int BATCH_SIZE = 100000;
+    private static final int BATCH_SIZE = 1000;
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -101,16 +84,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Insert firstname_data records in batch
     public void insertFirstNameData(List<FirstNameData> firstNameDataList) {
         SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
+        db.beginTransactionNonExclusive();
         try {
-            ContentValues values = new ContentValues();
+            String sql = "INSERT INTO " + TABLE_FIRST_NAME_DATA + " (" +
+                    KEY_YEAR + ", " + KEY_NAME + ", " + KEY_COUNT + ", " + KEY_IS_MALE + ") " +
+                    "VALUES (?, ?, ?, ?)";
+            SQLiteStatement statement = db.compileStatement(sql);
+
             for (FirstNameData data : firstNameDataList) {
-                values.clear();
-                values.put(KEY_YEAR, data.getYear());
-                values.put(KEY_NAME, data.getName());
-                values.put(KEY_COUNT, data.getCount());
-                values.put(KEY_IS_MALE, data.isMale() ? 1 : 0);
-                db.insert(TABLE_FIRST_NAME_DATA, null, values);
+                statement.clearBindings();
+                statement.bindLong(1, data.getYear());
+                statement.bindString(2, data.getName());
+                statement.bindLong(3, data.getCount());
+                statement.bindLong(4, data.isMale() ? 1 : 0);
+                statement.execute();
             }
             db.setTransactionSuccessful();
         } finally {
@@ -119,17 +106,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Insert live_firstname_data records in batch
+
+    // Insert live_firstname_data records in batch
     public void insertLiveFirstNameData(List<LiveFirstNameData> liveFirstNameDataList) {
         SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
+        db.beginTransactionNonExclusive();
         try {
-            ContentValues values = new ContentValues();
+            String sql = "INSERT INTO " + TABLE_LIVE_FIRST_NAME_DATA + " (" +
+                    KEY_LIVE_NAME + ", " + KEY_LIVE_COUNT + ", " + KEY_IS_MALE_LIVE + ") " +
+                    "VALUES (?, ?, ?)";
+            SQLiteStatement statement = db.compileStatement(sql);
+
             for (LiveFirstNameData data : liveFirstNameDataList) {
-                values.clear();
-                values.put(KEY_LIVE_NAME, data.getName());
-                values.put(KEY_LIVE_COUNT, data.getCount());
-                values.put(KEY_IS_MALE_LIVE, data.isMale() ? 1 : 0);
-                db.insert(TABLE_LIVE_FIRST_NAME_DATA, null, values);
+                statement.clearBindings();
+                statement.bindString(1, data.getName());
+                statement.bindLong(2, data.getCount());
+                statement.bindLong(3, data.isMale() ? 1 : 0);
+                statement.execute();
             }
             db.setTransactionSuccessful();
         } finally {
