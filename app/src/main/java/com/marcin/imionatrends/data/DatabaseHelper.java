@@ -106,8 +106,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Insert live_firstname_data records in batch
-
-    // Insert live_firstname_data records in batch
     public void insertLiveFirstNameData(List<LiveFirstNameData> liveFirstNameDataList) {
         SQLiteDatabase db = getWritableDatabase();
         db.beginTransactionNonExclusive();

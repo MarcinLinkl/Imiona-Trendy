@@ -43,8 +43,10 @@ private ActivityMainBinding binding;
     private void updateDatabase() {
         CSVDownloader.downloadCsvData(this,
                 () -> runOnUiThread(() -> Toast.makeText(MainActivity.this, "Checking And Updating Complete", Toast.LENGTH_SHORT).show()),
-                () -> runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to download and complete data", Toast.LENGTH_SHORT).show())
-        );
+                () -> runOnUiThread(() -> Toast.makeText(MainActivity.this, "Failed to download and complete data", Toast.LENGTH_SHORT).show()),
+                () -> runOnUiThread(() -> Toast.makeText(MainActivity.this, "Data is missing or incomplete, starting download", Toast.LENGTH_SHORT).show()),
+                () -> runOnUiThread(() -> Toast.makeText(MainActivity.this, "Data is already available", Toast.LENGTH_SHORT).show()));
+
     }
 
 }
