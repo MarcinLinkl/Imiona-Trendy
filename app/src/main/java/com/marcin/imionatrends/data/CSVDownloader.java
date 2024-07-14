@@ -42,7 +42,7 @@ public class CSVDownloader {
     );
     private static final String CSV_NAMES_LIVE_MALE_FROM_2024 = "https://api.dane.gov.pl/resources/54109,lista-imion-meskich-w-rejestrze-pesel-stan-na-19012023-imie-pierwsze/csv";
     private static final String CSV_NAMES_LIVE_FEMALE_FROM_2024 = "https://api.dane.gov.pl/resources/54110,lista-imion-zenskich-w-rejestrze-pesel-stan-na-19012024-imie-pierwsze/csv";
-    private static final int TIMEOUT = 30;
+    private static final int TIMEOUT = 2;
 
     public static void downloadCsvData(Context context, Runnable onSuccess, Runnable onFailure) {
         new Thread(() -> {

@@ -11,6 +11,7 @@ import android.util.Log;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -43,8 +44,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_IS_MALE_LIVE = "is_male";
 
     // Batch size for bulk insertion
-    private static final int BATCH_SIZE = 1000;
-
+    private static final int BATCH_SIZE = 10000;
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -168,14 +168,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void downloadAndInsertCSVGivenNames(String urlString, int year) throws IOException, CsvException {
         URL url = new URL(urlString);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try (CSVReader reader = new CSVReader(new InputStreamReader(urlConnection.getInputStream()))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+            CSVReader csvReader = new CSVReader(reader)) {
             List<FirstNameData> batchData = new ArrayList<>();
-            List<String[]> rows = reader.readAll();
-            for (int i = 1; i < rows.size(); i++) {
-                String[] columns = rows.get(i);
-                String name = columns[0];
-                int count = Integer.parseInt(columns[2]);
-                boolean isMale = columns[1].toUpperCase().startsWith("M");
+            String[] nextLine;
+            csvReader.readNext(); // Skip header
+            while ((nextLine = csvReader.readNext()) != null) {
+                String name = nextLine[0];
+                int count = Integer.parseInt(nextLine[2]);
+                boolean isMale = nextLine[1].toUpperCase().startsWith("M");
                 FirstNameData firstNameData = new FirstNameData(year, name, count, isMale);
                 batchData.add(firstNameData);
                 if (batchData.size() >= BATCH_SIZE) {
@@ -186,23 +187,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // Insert remaining data
             if (!batchData.isEmpty()) {
                 insertFirstNameData(batchData); // Insert remaining data
-                batchData.clear();
             }
             Log.d(TAG, "Downloaded and inserted CSV GivenNames: " + urlString);
         }
     }
+
     public void downloadAndInsertCSVGivenNames(String urlString) throws IOException, CsvException {
         URL url = new URL(urlString);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try (CSVReader reader = new CSVReader(new InputStreamReader(urlConnection.getInputStream()))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+            CSVReader csvReader = new CSVReader(reader)) {
             List<FirstNameData> batchData = new ArrayList<>();
-            List<String[]> rows = reader.readAll();
-            for (int i = 1; i < rows.size(); i++) {
-                String[] columns = rows.get(i);
-                int year = Integer.parseInt(columns[0]);
-                String name = columns[1];
-                int count = Integer.parseInt(columns[2]);
-                boolean isMale = columns[3].toUpperCase().startsWith("M");
+            String[] nextLine;
+            csvReader.readNext(); // Skip header
+            while ((nextLine = csvReader.readNext()) != null) {
+                int year = Integer.parseInt(nextLine[0]);
+
+                String name = nextLine[1];
+                int count = Integer.parseInt(nextLine[2]);
+                boolean isMale = nextLine[3].toUpperCase().startsWith("M");
                 FirstNameData firstNameData = new FirstNameData(year, name, count, isMale);
                 batchData.add(firstNameData);
                 if (batchData.size() >= BATCH_SIZE) {
@@ -223,13 +226,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void downloadAndInsertCSVLiveNames(String urlString, boolean isMale) throws IOException, CsvException {
         URL url = new URL(urlString);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try (CSVReader reader = new CSVReader(new InputStreamReader(urlConnection.getInputStream()))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+             CSVReader csvReader = new CSVReader(reader)) {
             List<LiveFirstNameData> batchData = new ArrayList<>();
-            List<String[]> rows = reader.readAll();
-            for (int i = 1; i < rows.size(); i++) {
-                String[] columns = rows.get(i);
-                String name = columns[0];
-                int count = Integer.parseInt(columns[2]);
+            String[] nextLine;
+            csvReader.readNext();
+            while ((nextLine = csvReader.readNext()) != null) {
+                String name = nextLine[0];
+                int count = Integer.parseInt(nextLine[2]);
                 LiveFirstNameData liveFirstNameData = new LiveFirstNameData(name, count, isMale);
                 batchData.add(liveFirstNameData);
                 if (batchData.size() >= BATCH_SIZE) {
@@ -240,7 +244,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // Insert remaining data
             if (!batchData.isEmpty()) {
                 insertLiveFirstNameData(batchData); // Insert remaining data
-                batchData.clear();
             }
             Log.d(TAG, "Downloaded and inserted CSV LiveNames: " + (isMale ? "Male" : "Female"));
         }
