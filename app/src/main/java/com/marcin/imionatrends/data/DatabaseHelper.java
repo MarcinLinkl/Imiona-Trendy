@@ -226,7 +226,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 String name = nextLine[1];
                 int count = Integer.parseInt(nextLine[2]);
-                int isMale = nextLine[3].toUpperCase().startsWith("M")==true ? 1 : 0;
+                int isMale = nextLine[3].toUpperCase().startsWith("M") ? 1 : 0;
                 FirstNameData firstNameData = new FirstNameData(year, name, count, isMale);
                 batchData.add(firstNameData);
                 if (batchData.size() >= BATCH_SIZE) {
@@ -275,7 +275,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 public List<LiveFirstNameData> getAllLiveFirstNameData() {
     List<LiveFirstNameData> liveFirstNameData = new ArrayList<>();
     SQLiteDatabase db = getReadableDatabase();
-    Cursor cursor = db.rawQuery("SELECT * FROM live_firstname_data", null);
+    Cursor cursor = db.rawQuery("SELECT * FROM live_firstname_data order by 3 desc", null);
     if (cursor.moveToFirst()) {
         do {
             LiveFirstNameData firstNameData = new LiveFirstNameData(

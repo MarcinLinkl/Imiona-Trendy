@@ -1,0 +1,8 @@
+<!-- res/values/arrays.xml -->
+<resources>
+    <string-array name="gender_options">
+        <item>Wszyscy</item>
+        <item>Mężczyźni</item>
+        <item>Kobiety</item>
+    </string-array>
+</resources>

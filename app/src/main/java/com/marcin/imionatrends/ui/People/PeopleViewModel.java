@@ -1,19 +1,33 @@
 package com.marcin.imionatrends.ui.People;
 
+import android.app.Application;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
-public class PeopleViewModel extends ViewModel {
+import com.marcin.imionatrends.data.DatabaseHelper;
+import com.marcin.imionatrends.data.LiveFirstNameData;
 
-    private final MutableLiveData<String> mText;
+import java.util.List;
 
-    public PeopleViewModel() {
-        mText = new MutableLiveData<>();
-        mText.setValue("This is home fragment");
+public class PeopleViewModel extends AndroidViewModel {
+    private final MutableLiveData<List<LiveFirstNameData>> liveFirstNameData;
+
+    public PeopleViewModel(@NonNull Application application) {
+        super(application);
+        liveFirstNameData = new MutableLiveData<>();
+        loadLiveFirstNameData(application);
     }
 
-    public LiveData<String> getText() {
-        return mText;
+    public LiveData<List<LiveFirstNameData>> getLiveFirstNameData() {
+        return liveFirstNameData;
+    }
+
+    private void loadLiveFirstNameData(Application application) {
+        DatabaseHelper dbHelper = new DatabaseHelper(application);
+        List<LiveFirstNameData> data = dbHelper.getAllLiveFirstNameData();
+        liveFirstNameData.setValue(data);
     }
 }
