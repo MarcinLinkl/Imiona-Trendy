@@ -63,7 +63,7 @@ public class CSVDownloader {
                  if (dbHelper.isLiveFirstNameDataEmpty()) {
                         executor.submit(() -> {
                             try {
-                                downloadAndInsertCSVLiveNames(dbHelper, CSV_NAMES_LIVE_FEMALE_FROM_2024, false);
+                                downloadAndInsertCSVLiveNames(dbHelper, CSV_NAMES_LIVE_FEMALE_FROM_2024, 0);
                             } catch (IOException | CsvException e) {
                                 e.printStackTrace();
                                 onFailureInsertingData.run();
@@ -72,7 +72,7 @@ public class CSVDownloader {
 
                         executor.submit(() -> {
                             try {
-                                downloadAndInsertCSVLiveNames(dbHelper, CSV_NAMES_LIVE_MALE_FROM_2024, true);
+                                downloadAndInsertCSVLiveNames(dbHelper, CSV_NAMES_LIVE_MALE_FROM_2024, 1);
                             } catch (IOException | CsvException e) {
                                 e.printStackTrace();
                                 onFailureInsertingData.run();
@@ -92,17 +92,20 @@ public class CSVDownloader {
                 } catch (InterruptedException e) {
                     executor.shutdownNow();
                 }
+                long endTime = System.currentTimeMillis();
+                long elapsedTime = endTime - startTime;
+                Log.d(TAG, "Time elapsed: " + elapsedTime / 1000 + "s");
+//                populate table with all unique live names
 
                 // Notify success
                 onSuccessInsertingData.run();
+
             } catch (Exception e) {
                 e.printStackTrace();
                 onFailureInsertingData.run();
             }
 
-            long endTime = System.currentTimeMillis();
-            long elapsedTime = endTime - startTime;
-            Log.d(TAG, "Time elapsed: " + elapsedTime / 1000 + "s");
+
         }).start();
     }
 
@@ -114,7 +117,7 @@ public class CSVDownloader {
         dbHelper.downloadAndInsertCSVGivenNames(urlString, year);
     }
 
-    private static void downloadAndInsertCSVLiveNames(DatabaseHelper dbHelper, String urlString, boolean isMale) throws IOException, CsvException {
+    private static void downloadAndInsertCSVLiveNames(DatabaseHelper dbHelper, String urlString, int isMale) throws IOException, CsvException {
         dbHelper.downloadAndInsertCSVLiveNames(urlString, isMale);
     }
 }

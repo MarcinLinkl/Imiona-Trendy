@@ -4,9 +4,9 @@ package com.marcin.imionatrends.data;
 public class LiveFirstNameData {
     private String name;
     private int count;
-    private boolean isMale;
+    private int isMale;
 
-    public LiveFirstNameData(String name, int count, boolean isMale) {
+    public LiveFirstNameData(String name, int count, int isMale) {
         this.name = name;
         this.count = count;
         this.isMale = isMale;
@@ -20,7 +20,7 @@ public class LiveFirstNameData {
         return count;
     }
 
-    public boolean isMale() {
+    public int isMale() {
         return isMale;
     }
 }

@@ -1,4 +1,4 @@
-package com.marcin.imionatrends.ui.home;
+package com.marcin.imionatrends.ui.People;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,17 +10,17 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import com.marcin.imionatrends.databinding.FragmentHomeBinding;
 
-public class HomeFragment extends Fragment {
+public class PeopleFragment extends Fragment {
 
 private FragmentHomeBinding binding;
 
-    public HomeFragment() {
+    public PeopleFragment() {
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
             ViewGroup container, Bundle savedInstanceState) {
-        HomeViewModel homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
+        PeopleViewModel homeViewModel =
+                new ViewModelProvider(this).get(PeopleViewModel.class);
 
     binding = FragmentHomeBinding.inflate(inflater, container, false);
     View root = binding.getRoot();

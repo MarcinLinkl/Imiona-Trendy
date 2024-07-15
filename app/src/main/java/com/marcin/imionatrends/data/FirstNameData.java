@@ -5,9 +5,9 @@ public class FirstNameData {
     private int year;
     private String name;
     private int count;
-    private boolean isMale;
+    private int isMale;
 
-    public FirstNameData(int year, String name, int count, boolean isMale) {
+    public FirstNameData(int year, String name, int count, int isMale) {
         this.year = year;
         this.name = name;
         this.count = count;
@@ -26,7 +26,7 @@ public class FirstNameData {
         return count;
     }
 
-    public boolean isMale() {
+    public int isMale() {
         return isMale;
     }
 }

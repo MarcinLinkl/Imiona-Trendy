@@ -28,6 +28,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Table names
     private static final String TABLE_FIRST_NAME_DATA = "firstname_data";
     private static final String TABLE_LIVE_FIRST_NAME_DATA = "live_firstname_data";
+    private static final String TABLE_UNIQUE_NAMES = "unique_names";
 
     // Common column names
     private static final String KEY_ID = "id";
@@ -42,6 +43,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_LIVE_NAME = "live_name";
     private static final String KEY_LIVE_COUNT = "live_count";
     private static final String KEY_IS_MALE_LIVE = "is_male";
+
+
 
     // Batch size for bulk insertion
     private static final int BATCH_SIZE = 10000;
@@ -69,6 +72,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_IS_MALE_LIVE + " INTEGER"
                 + ")";
         db.execSQL(CREATE_TABLE_LIVE_FIRST_NAME_DATA);
+        //create unique_names table
+        String CREATE_TABLE_UNIQUE_NAMES = "CREATE TABLE " + TABLE_UNIQUE_NAMES + "("
+                + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + KEY_NAME + " TEXT"
+                + ")";
+        db.execSQL(CREATE_TABLE_UNIQUE_NAMES);
     }
 
     @Override
@@ -76,7 +85,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // Drop older tables if existed
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_FIRST_NAME_DATA);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_LIVE_FIRST_NAME_DATA);
-
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_UNIQUE_NAMES);
         // Create tables again
         onCreate(db);
     }
@@ -96,7 +105,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 statement.bindLong(1, data.getYear());
                 statement.bindString(2, data.getName());
                 statement.bindLong(3, data.getCount());
-                statement.bindLong(4, data.isMale() ? 1 : 0);
+                statement.bindLong(4, data.isMale());
                 statement.execute();
             }
             db.setTransactionSuccessful();
@@ -119,7 +128,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 statement.clearBindings();
                 statement.bindString(1, data.getName());
                 statement.bindLong(2, data.getCount());
-                statement.bindLong(3, data.isMale() ? 1 : 0);
+                statement.bindLong(3, data.isMale());
                 statement.execute();
             }
             db.setTransactionSuccessful();
@@ -155,11 +164,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT DISTINCT " + KEY_YEAR + " FROM " + TABLE_FIRST_NAME_DATA, null);
         if (cursor.moveToFirst()) {
             do {
-                years.add(cursor.getInt(cursor.getColumnIndex(KEY_YEAR)));
+                years.add(cursor.getInt(cursor.getColumnIndexOrThrow(KEY_YEAR)));
             } while (cursor.moveToNext());
         }
         cursor.close();
         return years;
+    }
+    //    get all distinct names from firstname_data table
+    public List<String> getAllUniqueNames() {
+        List<String> names = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT DISTINCT " + KEY_NAME + " FROM " + TABLE_FIRST_NAME_DATA, null);
+        if (cursor.moveToFirst()) {
+            do {
+                names.add(cursor.getString(cursor.getColumnIndexOrThrow(KEY_NAME)));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return names;
+
     }
 
     // Download and insert data for given names from CSV URL
@@ -167,14 +190,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         URL url = new URL(urlString);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            CSVReader csvReader = new CSVReader(reader)) {
+             CSVReader csvReader = new CSVReader(reader)) {
             List<FirstNameData> batchData = new ArrayList<>();
             String[] nextLine;
             csvReader.readNext(); // Skip header
             while ((nextLine = csvReader.readNext()) != null) {
                 String name = nextLine[0];
                 int count = Integer.parseInt(nextLine[2]);
-                boolean isMale = nextLine[1].toUpperCase().startsWith("M");
+                int isMale = nextLine[1].toUpperCase().startsWith("M")==true ? 1 : 0;
                 FirstNameData firstNameData = new FirstNameData(year, name, count, isMale);
                 batchData.add(firstNameData);
                 if (batchData.size() >= BATCH_SIZE) {
@@ -194,7 +217,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         URL url = new URL(urlString);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            CSVReader csvReader = new CSVReader(reader)) {
+             CSVReader csvReader = new CSVReader(reader)) {
             List<FirstNameData> batchData = new ArrayList<>();
             String[] nextLine;
             csvReader.readNext(); // Skip header
@@ -203,7 +226,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 String name = nextLine[1];
                 int count = Integer.parseInt(nextLine[2]);
-                boolean isMale = nextLine[3].toUpperCase().startsWith("M");
+                int isMale = nextLine[3].toUpperCase().startsWith("M")==true ? 1 : 0;
                 FirstNameData firstNameData = new FirstNameData(year, name, count, isMale);
                 batchData.add(firstNameData);
                 if (batchData.size() >= BATCH_SIZE) {
@@ -221,7 +244,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Download and insert live data from CSV URL
-    public void downloadAndInsertCSVLiveNames(String urlString, boolean isMale) throws IOException, CsvException {
+    public void downloadAndInsertCSVLiveNames(String urlString, int isMale) throws IOException, CsvException {
         URL url = new URL(urlString);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
@@ -243,7 +266,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (!batchData.isEmpty()) {
                 insertLiveFirstNameData(batchData); // Insert remaining data
             }
-            Log.d(TAG, "Downloaded and inserted CSV LiveNames: " + (isMale ? "Male" : "Female"));
+            Log.d(TAG, "Downloaded and inserted CSV LiveNames: " + (isMale == 1 ? "Male" : "Female"));
         }
     }
+
+
+//    get data from live_firstname_data table
+public List<LiveFirstNameData> getAllLiveFirstNameData() {
+    List<LiveFirstNameData> liveFirstNameData = new ArrayList<>();
+    SQLiteDatabase db = getReadableDatabase();
+    Cursor cursor = db.rawQuery("SELECT * FROM live_firstname_data", null);
+    if (cursor.moveToFirst()) {
+        do {
+            LiveFirstNameData firstNameData = new LiveFirstNameData(
+                    cursor.getString(cursor.getColumnIndexOrThrow(KEY_LIVE_NAME)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(KEY_LIVE_COUNT)),
+                    cursor.getInt(cursor.getColumnIndexOrThrow(KEY_IS_MALE_LIVE))
+            );
+            liveFirstNameData.add(firstNameData);
+        } while (cursor.moveToNext());
+    }
+    cursor.close();
+    db.close(); // Zamknięcie bazy danych
+    return liveFirstNameData;
+}
+
+
+
 }
