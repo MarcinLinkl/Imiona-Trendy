@@ -300,7 +300,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public List<Integer> getYears() {
         List<Integer> years = new ArrayList<>();
-        for (int year = 2000; year <= LAST_YEAR_AVAILABLE_DATA; year++) {
+        for (int year = LAST_YEAR_AVAILABLE_DATA; year >= 2000; year--) {
             years.add(year);
         }
         return years;
@@ -314,7 +314,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String genderFilter = null;
         if (gender.equals("Wszyscy")) {
-            genderFilter = null; // No filter for gender
+            // No filter for gender
             Log.d("DatabaseHelper", "Gender filter set to 'Wszyscy'");
         } else if (gender.equals("Mężczyźni")) {
             genderFilter = "1";

@@ -56,10 +56,10 @@ public class NameAdapter extends RecyclerView.Adapter<NameAdapter.NameViewHolder
 
         NameViewHolder(@NonNull View itemView) {
             super(itemView);
-            rankTextView = itemView.findViewById(R.id.rank_text_view);
-            nameTextView = itemView.findViewById(R.id.name_text_view);
-            countTextView = itemView.findViewById(R.id.count_text_view);
-            percentageTextView = itemView.findViewById(R.id.percentage_text_view);
+            rankTextView = itemView.findViewById(R.id.order_number);
+            nameTextView = itemView.findViewById(R.id.first_name);
+            countTextView = itemView.findViewById(R.id.count);
+            percentageTextView = itemView.findViewById(R.id.percentage);
         }
     }
 }

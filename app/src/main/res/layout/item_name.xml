@@ -2,39 +2,39 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="16dp">
+    android:padding="8dp">
 
     <TextView
-        android:id="@+id/rank_text_view"
+        android:id="@+id/order_number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:textAppearanceMedium"
-        android:textColor="@color/black" />
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="8dp"
+        android:textSize="16sp" />
+
 
     <TextView
-        android:id="@+id/name_text_view"
+        android:id="@+id/first_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:gravity="start"
-        android:textAppearance="?android:textAppearanceMedium"
-        android:textColor="@color/black"
-        android:layout_marginStart="16dp"/>
+        android:layout_gravity="center_vertical"
+        android:textSize="16sp" />
+
 
     <TextView
-        android:id="@+id/count_text_view"
+        android:id="@+id/count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:textAppearanceMedium"
-        android:textColor="@color/black"
-        android:layout_marginStart="16dp"/>
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="8dp"
+        android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/percentage_text_view"
+        android:id="@+id/percentage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:textAppearanceMedium"
-        android:textColor="@color/black"
-        android:layout_marginStart="16dp"/>
+        android:layout_gravity="center_vertical"
+        android:textSize="16sp" />
 
 </LinearLayout>

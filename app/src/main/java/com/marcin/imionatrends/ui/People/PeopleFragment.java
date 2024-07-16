@@ -10,19 +10,16 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.marcin.imionatrends.R;
-import com.marcin.imionatrends.data.LiveFirstNameData;
-
 import java.util.ArrayList;
 
 public class PeopleFragment extends Fragment {
+
     private PeopleViewModel peopleViewModel;
     private RecyclerView recyclerView;
     private LiveFirstNameDataAdapter adapter;
@@ -50,7 +47,6 @@ public class PeopleFragment extends Fragment {
                 recyclerView.setVisibility(View.VISIBLE);
                 emptyView.setVisibility(View.GONE);
                 adapter.setLiveFirstNameData(liveFirstNameData);
-                adapter.notifyDataSetChanged();
             } else {
                 recyclerView.setVisibility(View.GONE);
                 emptyView.setVisibility(View.VISIBLE);
@@ -86,6 +82,6 @@ public class PeopleFragment extends Fragment {
     private void filterData() {
         String query = searchEditText.getText().toString();
         String gender = genderSpinner.getSelectedItem().toString();
-        adapter.filter(query, gender);
+        peopleViewModel.filterData(query, gender);
     }
 }
