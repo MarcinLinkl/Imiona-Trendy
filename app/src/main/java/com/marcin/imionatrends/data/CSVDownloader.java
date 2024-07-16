@@ -95,7 +95,7 @@ public class CSVDownloader {
                 long endTime = System.currentTimeMillis();
                 long elapsedTime = endTime - startTime;
                 Log.d(TAG, "Time elapsed: " + elapsedTime / 1000 + "s");
-//                populate table with all unique live names
+                dbHelper.updatePercentagesByYears();
 
                 // Notify success
                 onSuccessInsertingData.run();

@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -24,6 +25,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TAG = "DatabaseHelper";
     private static final String DATABASE_NAME = "imiona_trends.db";
     private static final int DATABASE_VERSION = 1;
+    private static final int LAST_YEAR_AVAILABLE_DATA = 2023;
 
     // Table names
     private static final String TABLE_FIRST_NAME_DATA = "firstname_data";
@@ -38,16 +40,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String KEY_NAME = "name";
     private static final String KEY_COUNT = "count";
     private static final String KEY_IS_MALE = "is_male";
+    private static final String KEY_PERCENTAGE = "percentage";
 
     // live_firstname_data table - column names
     private static final String KEY_LIVE_NAME = "live_name";
     private static final String KEY_LIVE_COUNT = "live_count";
     private static final String KEY_IS_MALE_LIVE = "is_male";
-
+    ;
 
 
     // Batch size for bulk insertion
     private static final int BATCH_SIZE = 10000;
+
+
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -60,7 +65,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + KEY_YEAR + " INTEGER,"
                 + KEY_NAME + " TEXT,"
                 + KEY_COUNT + " INTEGER,"
-                + KEY_IS_MALE + " INTEGER"
+                + KEY_IS_MALE + " INTEGER,"
+                + KEY_PERCENTAGE + " REAL"
                 + ")";
         db.execSQL(CREATE_TABLE_FIRST_NAME_DATA);
 
@@ -170,6 +176,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         return years;
     }
+
     //    get all distinct names from firstname_data table
     public List<String> getAllUniqueNames() {
         List<String> names = new ArrayList<>();
@@ -197,7 +204,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             while ((nextLine = csvReader.readNext()) != null) {
                 String name = nextLine[0];
                 int count = Integer.parseInt(nextLine[2]);
-                int isMale = nextLine[1].toUpperCase().startsWith("M")==true ? 1 : 0;
+                int isMale = nextLine[1].toUpperCase().startsWith("M") ? 1 : 0;
                 FirstNameData firstNameData = new FirstNameData(year, name, count, isMale);
                 batchData.add(firstNameData);
                 if (batchData.size() >= BATCH_SIZE) {
@@ -248,7 +255,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         URL url = new URL(urlString);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-             CSVReader csvReader = new CSVReader(reader)) {
+            CSVReader csvReader = new CSVReader(reader)) {
             List<LiveFirstNameData> batchData = new ArrayList<>();
             String[] nextLine;
             csvReader.readNext();
@@ -271,26 +278,110 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-//    get data from live_firstname_data table
-public List<LiveFirstNameData> getAllLiveFirstNameData() {
-    List<LiveFirstNameData> liveFirstNameData = new ArrayList<>();
-    SQLiteDatabase db = getReadableDatabase();
-    Cursor cursor = db.rawQuery("SELECT * FROM live_firstname_data order by 3 desc", null);
-    if (cursor.moveToFirst()) {
-        do {
-            LiveFirstNameData firstNameData = new LiveFirstNameData(
-                    cursor.getString(cursor.getColumnIndexOrThrow(KEY_LIVE_NAME)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(KEY_LIVE_COUNT)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(KEY_IS_MALE_LIVE))
-            );
-            liveFirstNameData.add(firstNameData);
-        } while (cursor.moveToNext());
+    //    get data from live_firstname_data table
+    public List<LiveFirstNameData> getAllLiveFirstNameData() {
+        List<LiveFirstNameData> liveFirstNameData = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM live_firstname_data order by 3 desc", null);
+        if (cursor.moveToFirst()) {
+            do {
+                LiveFirstNameData firstNameData = new LiveFirstNameData(
+                        cursor.getString(cursor.getColumnIndexOrThrow(KEY_LIVE_NAME)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(KEY_LIVE_COUNT)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(KEY_IS_MALE_LIVE))
+                );
+                liveFirstNameData.add(firstNameData);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return liveFirstNameData;
     }
-    cursor.close();
-    db.close(); // Zamknięcie bazy danych
-    return liveFirstNameData;
+
+    public List<Integer> getYears() {
+        List<Integer> years = new ArrayList<>();
+        for (int year = 2000; year <= LAST_YEAR_AVAILABLE_DATA; year++) {
+            years.add(year);
+        }
+        return years;
+    }
+
+
+    public List<FirstNameData> getRankingByYearAndGender(String year, String gender) {
+        List<FirstNameData> data = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+
+        String genderFilter = null;
+        if (gender.equals("Wszyscy")) {
+            genderFilter = null; // No filter for gender
+            Log.d("DatabaseHelper", "Gender filter set to 'Wszyscy'");
+        } else if (gender.equals("Mężczyźni")) {
+            genderFilter = "1";
+            Log.d("DatabaseHelper", "Gender filter set to 'Mężczyźni'");
+        } else if (gender.equals("Kobiety")) {
+            genderFilter = "0";
+            Log.d("DatabaseHelper", "Gender filter set to 'Kobiety'");
+        }
+
+        try {
+            String query;
+            String[] selectionArgs;
+            if (genderFilter == null) {
+                query = "SELECT * FROM " + TABLE_FIRST_NAME_DATA + " WHERE year = ?";
+                selectionArgs = new String[]{year};
+            } else {
+                query = "SELECT * FROM " + TABLE_FIRST_NAME_DATA + " WHERE year = ? AND is_male = ?";
+                selectionArgs = new String[]{year, genderFilter};
+            }
+
+            cursor = db.rawQuery(query, selectionArgs);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    String name = cursor.getString(2);
+                    int count = Integer.parseInt(cursor.getString(3));
+                    float percentage = Float.parseFloat(cursor.getString(5));
+                    FirstNameData firstNameData = new FirstNameData(name, count, percentage);
+                    data.add(firstNameData);
+
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error while trying to get ranking by year and gender", e);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
+
+        return data;
+    }
+
+
+
+    public void updatePercentagesByYears() {
+        List<Integer> years = getYears();
+        for (int year : years) {
+            updatePercentagesForYear(String.valueOf(year));
+        }
+    }
+
+
+    private void updatePercentagesForYear(String year) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT SUM(count) FROM firstname_data WHERE year = ?";
+        Cursor totalCursor = db.rawQuery(query, new String[]{year});
+        if (totalCursor.moveToFirst()) {
+            int total = totalCursor.getInt(0);
+            totalCursor.close();
+
+
+            String updateQuery = "UPDATE firstname_data SET percentage = (count * 100.0 / ?)";
+            db.execSQL(updateQuery, new String[]{String.valueOf(total)});
+
+        }
+    }
 }
 
-
-
-}
