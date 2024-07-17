@@ -1,4 +1,4 @@
-package com.marcin.imionatrends.ui.People;
+package com.marcin.imionatrends.ui.people;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,26 +12,18 @@ import java.util.List;
 
 public class LiveFirstNameDataAdapter extends RecyclerView.Adapter<LiveFirstNameDataAdapter.ViewHolder> {
     private List<LiveFirstNameData> liveFirstNameData;
-    private int totalCount;
+
 
     public LiveFirstNameDataAdapter(List<LiveFirstNameData> liveFirstNameData) {
         this.liveFirstNameData = liveFirstNameData;
-        this.totalCount = calculateTotalCount(liveFirstNameData);
+
     }
 
     public void setLiveFirstNameData(List<LiveFirstNameData> liveFirstNameData) {
         this.liveFirstNameData = liveFirstNameData;
-        this.totalCount = calculateTotalCount(liveFirstNameData);
         notifyDataSetChanged();
     }
 
-    private int calculateTotalCount(List<LiveFirstNameData> data) {
-        int count = 0;
-        for (LiveFirstNameData item : data) {
-            count += item.getCount();
-        }
-        return count;
-    }
 
     @NonNull
     @Override
@@ -47,7 +39,7 @@ public class LiveFirstNameDataAdapter extends RecyclerView.Adapter<LiveFirstName
         holder.orderNumber.setText(String.valueOf(position + 1));
         holder.firstName.setText(data.getName());
         holder.count.setText(String.valueOf(data.getCount()));
-        holder.percentage.setText(String.format("%.2f%%", (data.getCount() * 100.0 / totalCount)));
+        holder.percentage.setText(String.format("%.2f%%", (data.getPercentage())));
     }
 
     @Override

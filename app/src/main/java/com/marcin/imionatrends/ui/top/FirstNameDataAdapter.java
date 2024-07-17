@@ -14,7 +14,7 @@ import com.marcin.imionatrends.data.FirstNameData;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NameAdapter extends RecyclerView.Adapter<NameAdapter.NameViewHolder> {
+public class FirstNameDataAdapter extends RecyclerView.Adapter<FirstNameDataAdapter.NameViewHolder> {
 
     private List<FirstNameData> dataList = new ArrayList<>();
 

@@ -49,6 +49,9 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation("com.opencsv:opencsv:5.9")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+//    mikephil.charting:MPAndroidChart:v3.1.0
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
 
 
 

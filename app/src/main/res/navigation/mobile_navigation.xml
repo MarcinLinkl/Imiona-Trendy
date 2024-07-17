@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/navigation_people"
-        android:name="com.marcin.imionatrends.ui.People.PeopleFragment"
+        android:name="com.marcin.imionatrends.ui.people.PeopleFragment"
         android:label="@string/title_people"
         tools:layout="@layout/fragment_people" />
 
@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/navigation_chart"
-        android:name="com.marcin.imionatrends.ui.notifications.NotificationsFragment"
+        android:name="com.marcin.imionatrends.ui.charts.ChartsFragment"
         android:label="@string/title_chart"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_charts" />
 </navigation>

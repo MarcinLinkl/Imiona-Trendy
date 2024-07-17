@@ -1,4 +1,4 @@
-package com.marcin.imionatrends.ui.People;
+package com.marcin.imionatrends.ui.people;
 
 import android.os.Bundle;
 import android.text.Editable;

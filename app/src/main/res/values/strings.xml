@@ -2,5 +2,5 @@
     <string name="app_name">Imiona Trends</string>
     <string name="title_people">Osoby w Polsce</string>
     <string name="title_top">Top</string>
-    <string name="title_chart">Wykres</string>
+    <string name="title_chart">Wykresy</string>
 </resources>

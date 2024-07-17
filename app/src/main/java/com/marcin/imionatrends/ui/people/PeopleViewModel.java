@@ -1,4 +1,4 @@
-package com.marcin.imionatrends.ui.People;
+package com.marcin.imionatrends.ui.people;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -37,8 +37,8 @@ public class PeopleViewModel extends AndroidViewModel {
         for (LiveFirstNameData item : data) {
             boolean matchesName = item.getName().toLowerCase().contains(query.toLowerCase());
             boolean matchesGender = "Wszyscy".equals(gender) ||
-                    ("Mężczyźni".equals(gender) && item.isMale() == 1) ||
-                    ("Kobiety".equals(gender) && item.isMale() == 0);
+                    ("Mężczyźni".equals(gender) && item.getIsMale() == 1) ||
+                    ("Kobiety".equals(gender) && item.getIsMale() == 0);
             if (matchesName && matchesGender) {
                 filteredList.add(item);
             }

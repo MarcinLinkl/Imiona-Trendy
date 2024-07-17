@@ -134,7 +134,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 statement.clearBindings();
                 statement.bindString(1, data.getName());
                 statement.bindLong(2, data.getCount());
-                statement.bindLong(3, data.isMale());
+                statement.bindLong(3, data.getIsMale());
                 statement.execute();
             }
             db.setTransactionSuccessful();
@@ -378,8 +378,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             totalCursor.close();
 
 
-            String updateQuery = "UPDATE firstname_data SET percentage = (count * 100.0 / ?)";
-            db.execSQL(updateQuery, new String[]{String.valueOf(total)});
+            String updateQuery = "UPDATE firstname_data SET percentage = ROUND((count * 100.0 / ?), 4) WHERE year = ?";
+            db.execSQL(updateQuery, new String[]{String.valueOf(total), year});
 
         }
     }

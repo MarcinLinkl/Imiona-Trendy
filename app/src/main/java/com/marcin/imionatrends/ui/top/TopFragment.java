@@ -21,15 +21,13 @@ import com.marcin.imionatrends.R;
 import com.marcin.imionatrends.data.DatabaseHelper;
 import com.marcin.imionatrends.databinding.FragmentTopBinding;
 
-import java.util.List;
-
 
 public class TopFragment extends Fragment {
 
     private FragmentTopBinding binding;
     private TopViewModel topViewModel;
     private RecyclerView recyclerView;
-    private NameAdapter nameAdapter;
+    private FirstNameDataAdapter firstNameDataAdapter;
     private Spinner genderSpinner, yearSpinner;
     private EditText searchEditText;
 
@@ -41,8 +39,8 @@ public class TopFragment extends Fragment {
 
         recyclerView = binding.recyclerView;
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        nameAdapter = new NameAdapter();
-        recyclerView.setAdapter(nameAdapter);
+        firstNameDataAdapter = new FirstNameDataAdapter();
+        recyclerView.setAdapter(firstNameDataAdapter);
 
         genderSpinner = binding.genderSpinner;
         yearSpinner = binding.yearSpinner;
@@ -67,7 +65,7 @@ public class TopFragment extends Fragment {
         // Observe data from ViewModel
         topViewModel.getFirstNameData().observe(getViewLifecycleOwner(), firstNameData -> {
             // Update data in adapter
-            nameAdapter.setData(firstNameData);
+            firstNameDataAdapter.setData(firstNameData);
         });
 
         // Set up search functionality
