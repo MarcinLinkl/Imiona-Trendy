@@ -18,9 +18,9 @@ public class LiveFirstNameData {
         this.count = count;
         this.isMale = isMale;
     }
-    public LiveFirstNameData(String name,  int isMale) {
+    public LiveFirstNameData(String name) {
         this.name = name;
-        this.isMale = isMale;
+
     }
 
     public String getName() {

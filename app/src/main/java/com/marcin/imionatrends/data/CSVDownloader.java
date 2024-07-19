@@ -95,7 +95,10 @@ public class CSVDownloader {
                 long endTime = System.currentTimeMillis();
                 long elapsedTime = endTime - startTime;
                 Log.d(TAG, "Time elapsed: " + elapsedTime / 1000 + "s");
-                dbHelper.updatePercentagesByYears();
+                dbHelper.updatePercentagesGivenNamesByYears();
+                dbHelper.updatePercentagesLiveNames();
+
+
 
                 // Notify success
                 onSuccessInsertingData.run();

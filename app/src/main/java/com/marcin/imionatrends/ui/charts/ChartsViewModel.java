@@ -1,5 +1,10 @@
 package com.marcin.imionatrends.ui.charts;
 
+import android.app.Application;
+
+import com.marcin.imionatrends.data.DatabaseHelper;
+
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -8,16 +13,22 @@ import com.github.mikephil.charting.data.LineData;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChartsViewModel extends ViewModel {
+public class ChartsViewModel extends AndroidViewModel {
 
     private final MutableLiveData<String> searchQuery = new MutableLiveData<>();
     private final MutableLiveData<List<String>> searchResults = new MutableLiveData<>();
     private final MutableLiveData<LineData> chartData = new MutableLiveData<>();
 
-    public ChartsViewModel() {
+    private DatabaseHelper databaseHelper;
+
+    public ChartsViewModel(Application application) {
+        super(application);
         searchQuery.setValue("");
         searchResults.setValue(new ArrayList<>());
         chartData.setValue(new LineData());
+
+        databaseHelper = new DatabaseHelper(application);
+        loadUniqueNames();
     }
 
     public LiveData<String> getSearchQuery() {
@@ -40,5 +51,10 @@ public class ChartsViewModel extends ViewModel {
 
     public void setChartData(LineData data) {
         chartData.setValue(data);
+    }
+
+    private void loadUniqueNames() {
+        List<String> uniqueNames = databaseHelper.getAllUniqueNames();
+        searchResults.setValue(uniqueNames);
     }
 }

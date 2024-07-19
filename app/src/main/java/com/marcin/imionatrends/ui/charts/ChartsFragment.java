@@ -7,9 +7,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -32,6 +34,11 @@ public class ChartsFragment extends Fragment {
         RecyclerView recyclerView = binding.recyclerView;
         LineChart lineChart = binding.lineChart;
 
+        // Initialize adapter and set it to RecyclerView
+        NameAdapter adapter = new NameAdapter();
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext())); // Set LayoutManager
+
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -51,13 +58,12 @@ public class ChartsFragment extends Fragment {
 
         // Observe LiveData from ViewModel and update UI accordingly
         chartsViewModel.getSearchResults().observe(getViewLifecycleOwner(), searchResults -> {
-            // Update RecyclerView with search results
-            // e.g., recyclerView.setAdapter(new YourAdapter(searchResults));
+            adapter.setData(searchResults);
         });
 
         chartsViewModel.getChartData().observe(getViewLifecycleOwner(), chartData -> {
             // Update LineChart with new data
-            // e.g., lineChart.setData(new LineData(chartData));
+            lineChart.setData(chartData); // Set data to the chart
             lineChart.invalidate(); // Refresh the chart
         });
 

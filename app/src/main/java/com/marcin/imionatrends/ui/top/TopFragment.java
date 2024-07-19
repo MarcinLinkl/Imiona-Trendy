@@ -27,7 +27,7 @@ public class TopFragment extends Fragment {
     private FragmentTopBinding binding;
     private TopViewModel topViewModel;
     private RecyclerView recyclerView;
-    private FirstNameDataAdapter firstNameDataAdapter;
+    private GivenFirstNameDataAdapter givenFirstNameDataAdapter;
     private Spinner genderSpinner, yearSpinner;
     private EditText searchEditText;
 
@@ -39,8 +39,8 @@ public class TopFragment extends Fragment {
 
         recyclerView = binding.recyclerView;
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        firstNameDataAdapter = new FirstNameDataAdapter();
-        recyclerView.setAdapter(firstNameDataAdapter);
+        givenFirstNameDataAdapter = new GivenFirstNameDataAdapter();
+        recyclerView.setAdapter(givenFirstNameDataAdapter);
 
         genderSpinner = binding.genderSpinner;
         yearSpinner = binding.yearSpinner;
@@ -65,7 +65,7 @@ public class TopFragment extends Fragment {
         // Observe data from ViewModel
         topViewModel.getFirstNameData().observe(getViewLifecycleOwner(), firstNameData -> {
             // Update data in adapter
-            firstNameDataAdapter.setData(firstNameData);
+            givenFirstNameDataAdapter.setData(firstNameData);
         });
 
         // Set up search functionality

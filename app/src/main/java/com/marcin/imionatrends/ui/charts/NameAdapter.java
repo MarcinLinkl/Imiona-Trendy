@@ -1,4 +1,4 @@
-package com.marcin.imionatrends.ui.top;
+package com.marcin.imionatrends.ui.charts;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,14 +9,14 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.marcin.imionatrends.R;
-import com.marcin.imionatrends.data.FirstNameData;
+import com.marcin.imionatrends.data.LiveFirstNameData;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class FirstNameDataAdapter extends RecyclerView.Adapter<FirstNameDataAdapter.NameViewHolder> {
+public class NameAdapter extends RecyclerView.Adapter<NameAdapter.NameViewHolder> {
 
-    private List<FirstNameData> dataList = new ArrayList<>();
+    private List<String> dataList = new ArrayList<>();
 
     @NonNull
     @Override
@@ -27,11 +27,9 @@ public class FirstNameDataAdapter extends RecyclerView.Adapter<FirstNameDataAdap
 
     @Override
     public void onBindViewHolder(@NonNull NameViewHolder holder, int position) {
-        FirstNameData data = dataList.get(position);
+        String data = dataList.get(position);
         holder.rankTextView.setText(String.valueOf(position + 1));
-        holder.nameTextView.setText(data.getName());
-        holder.countTextView.setText(String.valueOf(data.getCount()));
-        holder.percentageTextView.setText(String.format("%.2f%%", data.getPercentage()));
+        holder.nameTextView.setText(data);
     }
 
     @Override
@@ -39,7 +37,7 @@ public class FirstNameDataAdapter extends RecyclerView.Adapter<FirstNameDataAdap
         return dataList.size();
     }
 
-    public void setData(List<FirstNameData> data) {
+    public void setData(List<String> data) {
         this.dataList.clear();
         if (data != null) {
             this.dataList.addAll(data);
@@ -51,15 +49,11 @@ public class FirstNameDataAdapter extends RecyclerView.Adapter<FirstNameDataAdap
 
         TextView rankTextView;
         TextView nameTextView;
-        TextView countTextView;
-        TextView percentageTextView;
 
         NameViewHolder(@NonNull View itemView) {
             super(itemView);
             rankTextView = itemView.findViewById(R.id.order_number);
             nameTextView = itemView.findViewById(R.id.first_name);
-            countTextView = itemView.findViewById(R.id.count);
-            percentageTextView = itemView.findViewById(R.id.percentage);
         }
     }
 }

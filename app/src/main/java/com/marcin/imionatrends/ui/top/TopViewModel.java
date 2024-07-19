@@ -7,14 +7,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.marcin.imionatrends.data.DatabaseHelper;
-import com.marcin.imionatrends.data.FirstNameData;
+import com.marcin.imionatrends.data.GivenFirstNameData;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TopViewModel extends AndroidViewModel {
 
-    private MutableLiveData<List<FirstNameData>> firstNameData;
+    private MutableLiveData<List<GivenFirstNameData>> firstNameData;
     private DatabaseHelper databaseHelper;
 
     public TopViewModel(Application application) {
@@ -23,21 +23,21 @@ public class TopViewModel extends AndroidViewModel {
         firstNameData = new MutableLiveData<>();
     }
 
-    public LiveData<List<FirstNameData>> getFirstNameData() {
+    public LiveData<List<GivenFirstNameData>> getFirstNameData() {
         return firstNameData;
     }
 
     public void filterData(String query, String gender, String year) {
-        List<FirstNameData> data = databaseHelper.getRankingByYearAndGender(year, gender);
+        List<GivenFirstNameData> data = databaseHelper.getRankingByYearAndGender(year, gender);
         if (!query.isEmpty()) {
             data = filterByName(data, query);
         }
         firstNameData.setValue(data);
     }
 
-    private List<FirstNameData> filterByName(List<FirstNameData> data, String query) {
-        List<FirstNameData> filteredList = new ArrayList<>();
-        for (FirstNameData firstName : data) {
+    private List<GivenFirstNameData> filterByName(List<GivenFirstNameData> data, String query) {
+        List<GivenFirstNameData> filteredList = new ArrayList<>();
+        for (GivenFirstNameData firstName : data) {
 
             if (firstName.getName().toLowerCase().contains(query.toLowerCase())) {
                 filteredList.add(firstName);
