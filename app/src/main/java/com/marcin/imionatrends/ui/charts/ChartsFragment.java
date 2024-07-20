@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Switch;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.LineData;
 import com.marcin.imionatrends.databinding.FragmentChartsBinding;
 
 public class ChartsFragment extends Fragment {
@@ -33,9 +35,13 @@ public class ChartsFragment extends Fragment {
         EditText searchEditText = binding.searchEditText;
         RecyclerView recyclerView = binding.recyclerView;
         LineChart lineChart = binding.lineChart;
+        Switch chartSwitch = binding.chartSwitch;
 
-        // Initialize adapter and set it to RecyclerView
-        NameAdapter adapter = new NameAdapter();
+        // Initialize adapter with item click listener
+        NameAdapter adapter = new NameAdapter(name -> {
+            // Handle item click: update chart data
+            updateChartForName(name);
+        });
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext())); // Set LayoutManager
 
@@ -56,6 +62,10 @@ public class ChartsFragment extends Fragment {
             }
         });
 
+        chartSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            chartsViewModel.setIsPercentage(isChecked); // Update percentage mode
+        });
+
         // Observe LiveData from ViewModel and update UI accordingly
         chartsViewModel.getSearchResults().observe(getViewLifecycleOwner(), searchResults -> {
             adapter.setData(searchResults);
@@ -68,6 +78,11 @@ public class ChartsFragment extends Fragment {
         });
 
         return root;
+    }
+
+    private void updateChartForName(String name) {
+        // Fetch chart data for the selected name with current mode
+        chartsViewModel.updateChartData(name);
     }
 
     @Override

@@ -5,8 +5,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.graphics.Color;
 import android.util.Log;
 
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 
@@ -298,26 +302,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
 
+        // Define gender filter
         String genderFilter = null;
-        if (gender.equals("Wszyscy")) {
-            // No filter for gender
-            Log.d("DatabaseHelper", "Gender filter set to 'Wszyscy'");
-        } else if (gender.equals("Mężczyźni")) {
-            genderFilter = "1";
-            Log.d("DatabaseHelper", "Gender filter set to 'Mężczyźni'");
-        } else if (gender.equals("Kobiety")) {
-            genderFilter = "0";
-            Log.d("DatabaseHelper", "Gender filter set to 'Kobiety'");
+        switch (gender) {
+            case "Wszyscy":
+                // No filter for gender
+                Log.d("DatabaseHelper", "Gender filter set to 'Wszyscy'");
+                break;
+            case "Mężczyźni":
+                genderFilter = "1";
+                Log.d("DatabaseHelper", "Gender filter set to 'Mężczyźni'");
+                break;
+            case "Kobiety":
+                genderFilter = "0";
+                Log.d("DatabaseHelper", "Gender filter set to 'Kobiety'");
+                break;
         }
 
         try {
             String query;
             String[] selectionArgs;
             if (genderFilter == null) {
-                query = "SELECT * FROM " + TABLE_GIVEN_FIRST_NAME_DATA + " WHERE year = ?";
+                query = "SELECT name, count, percentage FROM " + TABLE_GIVEN_FIRST_NAME_DATA + " WHERE year = ?";
                 selectionArgs = new String[]{year};
             } else {
-                query = "SELECT * FROM " + TABLE_GIVEN_FIRST_NAME_DATA + " WHERE year = ? AND is_male = ?";
+                query = "SELECT name, count, percentage FROM " + TABLE_GIVEN_FIRST_NAME_DATA + " WHERE year = ? AND is_male = ?";
                 selectionArgs = new String[]{year, genderFilter};
             }
 
@@ -325,12 +334,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             if (cursor != null && cursor.moveToFirst()) {
                 do {
-                    String name = cursor.getString(2);
-                    int count = Integer.parseInt(cursor.getString(3));
-                    float percentage = Float.parseFloat(cursor.getString(5));
+                    String name = cursor.getString(cursor.getColumnIndex("name"));
+                    int count = cursor.getInt(cursor.getColumnIndex("count"));
+                    float percentage = cursor.getFloat(cursor.getColumnIndex("percentage"));
                     GivenFirstNameData givenFirstNameData = new GivenFirstNameData(name, count, percentage);
                     data.add(givenFirstNameData);
-
                 } while (cursor.moveToNext());
             }
         } catch (Exception e) {
@@ -344,6 +352,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return data;
     }
+
 
 
 
@@ -387,6 +396,45 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.d(TAG, "Updated percentages for live names");
     }
 
+
+    public LineData getChartDataForName(String name, boolean isPercentage) {
+        // Lista do przechowywania wartości wykresu
+        List<Entry> entries = new ArrayList<>();
+
+        SQLiteDatabase db = getReadableDatabase();
+
+        // Tworzenie zapytania SQL w zależności od wyboru (procentowe/liczbowe)
+        String query = "SELECT " + KEY_YEAR + ", " + (isPercentage ? KEY_PERCENTAGE : KEY_COUNT) +
+                " FROM " + TABLE_GIVEN_FIRST_NAME_DATA +
+                " WHERE " + KEY_NAME + " = ?" +
+                " ORDER BY " + KEY_YEAR + " ASC";
+
+        Cursor cursor = db.rawQuery(query, new String[]{name});
+
+        // Sprawdzanie, czy kursor zawiera wyniki
+        if (cursor.moveToFirst()) {
+            do {
+                // Pobieranie wartości z kursora
+                int year = cursor.getInt(cursor.getColumnIndex(KEY_YEAR));
+                float value = cursor.getFloat(cursor.getColumnIndex(isPercentage ? KEY_PERCENTAGE : KEY_COUNT));
+
+                // Dodawanie wartości do listy jako Entry (rok, wartość)
+                entries.add(new Entry(year, value));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close(); // Zamknięcie kursora
+        db.close(); // Zamknięcie bazy danych
+        // Tworzenie zestawu danych wykresu
+        Log.d(TAG, entries.size() + " entries");
+        Log.d(TAG, entries.toString());
+        LineDataSet dataSet = new LineDataSet(entries, "Data");
+        dataSet.setColor(Color.BLUE); // Kolor linii wykresu
+        dataSet.setValueTextColor(Color.BLACK); // Kolor tekstu wartości na wykresie
+
+        // Tworzenie obiektu LineData z zestawem danych
+        return new LineData(dataSet);
+    }
 
 }
 

@@ -9,50 +9,66 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.marcin.imionatrends.R;
-import com.marcin.imionatrends.data.LiveFirstNameData;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NameAdapter extends RecyclerView.Adapter<NameAdapter.NameViewHolder> {
 
-    private List<String> dataList = new ArrayList<>();
+public class NameAdapter extends RecyclerView.Adapter<NameAdapter.ViewHolder> {
+
+    private List<String> nameList = new ArrayList<>();
+    private OnItemClickListener onItemClickListener;
+    private String selectedName;
+
+    public interface OnItemClickListener {
+        void onItemClick(String name);
+    }
+
+    public NameAdapter(OnItemClickListener listener) {
+        this.onItemClickListener = listener;
+    }
 
     @NonNull
     @Override
-    public NameViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_name, parent, false);
-        return new NameViewHolder(view);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull NameViewHolder holder, int position) {
-        String data = dataList.get(position);
-        holder.rankTextView.setText(String.valueOf(position + 1));
-        holder.nameTextView.setText(data);
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        String name = nameList.get(position);
+        holder.nameTextView.setText(name);
+        holder.itemView.setOnClickListener(v -> {
+            selectedName = name; // Update the selected name
+            if (onItemClickListener != null) {
+                onItemClickListener.onItemClick(name);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return dataList.size();
+        return nameList.size();
     }
 
-    public void setData(List<String> data) {
-        this.dataList.clear();
-        if (data != null) {
-            this.dataList.addAll(data);
+    public void setData(List<String> names) {
+        this.nameList.clear();
+        if (names != null) {
+            this.nameList.addAll(names);
         }
         notifyDataSetChanged();
     }
 
-    static class NameViewHolder extends RecyclerView.ViewHolder {
+    public String getSelectedName() {
+        return selectedName;
+    }
 
-        TextView rankTextView;
+    static class ViewHolder extends RecyclerView.ViewHolder {
         TextView nameTextView;
 
-        NameViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
-            rankTextView = itemView.findViewById(R.id.order_number);
             nameTextView = itemView.findViewById(R.id.first_name);
         }
     }

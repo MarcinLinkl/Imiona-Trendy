@@ -18,10 +18,6 @@ public class LiveFirstNameData {
         this.count = count;
         this.isMale = isMale;
     }
-    public LiveFirstNameData(String name) {
-        this.name = name;
-
-    }
 
     public String getName() {
         return name;
