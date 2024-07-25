@@ -19,10 +19,15 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.LineData;
 import com.marcin.imionatrends.databinding.FragmentChartsBinding;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ChartsFragment extends Fragment {
 
     private FragmentChartsBinding binding;
     private ChartsViewModel chartsViewModel;
+    private NameAdapter nameAdapter;
+    private List<String> selectedNames = new ArrayList<>();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -38,10 +43,8 @@ public class ChartsFragment extends Fragment {
         Switch chartSwitch = binding.chartSwitch;
 
         // Initialize adapter with item click listener
-        NameAdapter adapter = new NameAdapter(name -> {
-            // Handle item click: update chart data
-            updateChartForName(name);
-        });
+        // Handle item click: update chart data
+        NameAdapter adapter = new NameAdapter(this::updateChartForName);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext())); // Set LayoutManager
 
@@ -64,6 +67,9 @@ public class ChartsFragment extends Fragment {
 
         chartSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             chartsViewModel.setIsPercentage(isChecked); // Update percentage mode
+
+
+
         });
 
         // Observe LiveData from ViewModel and update UI accordingly

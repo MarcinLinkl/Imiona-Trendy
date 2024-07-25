@@ -21,16 +21,13 @@ public class ChartsViewModel extends AndroidViewModel {
     private final MutableLiveData<Boolean> isPercentage = new MutableLiveData<>(false);
 
     private final DatabaseHelper databaseHelper;
-    private List<String> uniqueNames = new ArrayList<>(); // Initialize uniqueNames
+    private List<String> uniqueNames = new ArrayList<>();
+    private String selectedName = ""; // Przechowuje aktualnie wybrane imię
 
     public ChartsViewModel(Application application) {
         super(application);
         databaseHelper = new DatabaseHelper(application);
         loadUniqueNames();
-    }
-
-    public LiveData<String> getSearchQuery() {
-        return searchQuery;
     }
 
     public void setSearchQuery(String query) {
@@ -50,14 +47,16 @@ public class ChartsViewModel extends AndroidViewModel {
         chartData.setValue(data);
     }
 
-    public LiveData<Boolean> getIsPercentage() {
-        return isPercentage;
-    }
-
     public void setIsPercentage(boolean percentage) {
         isPercentage.setValue(percentage);
-        String query = searchQuery.getValue() != null ? searchQuery.getValue() : "";
-        filterNames(query); // Re-filter based on the updated percentage mode
+        updateChartData(selectedName); // Przekazuje aktualnie wybrane imię
+    }
+
+    public void updateChartData(String name) {
+        selectedName = name; // Zaktualizuj wybrane imię
+        boolean isPercentageValue = isPercentage.getValue() != null && isPercentage.getValue();
+        LineData data = databaseHelper.getChartDataForName(name, isPercentageValue);
+        setChartData(data); // Aktualizuj dane wykresu na podstawie wybranego imienia i trybu procentowego
     }
 
     private void loadUniqueNames() {
@@ -72,11 +71,5 @@ public class ChartsViewModel extends AndroidViewModel {
                     .collect(Collectors.toList());
             searchResults.setValue(filteredNames);
         }
-    }
-
-    public void updateChartData(String name) {
-        boolean isPercentageValue = isPercentage.getValue() != null && isPercentage.getValue();
-        LineData data = databaseHelper.getChartDataForName(name, isPercentageValue);
-        setChartData(data); // Update chart data based on the selected name and percentage mode
     }
 }

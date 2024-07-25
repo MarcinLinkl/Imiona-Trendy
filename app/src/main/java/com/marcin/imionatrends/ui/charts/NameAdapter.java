@@ -39,12 +39,7 @@ public class NameAdapter extends RecyclerView.Adapter<NameAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String name = nameList.get(position);
         holder.nameTextView.setText(name);
-        holder.itemView.setOnClickListener(v -> {
-            selectedName = name; // Update the selected name
-            if (onItemClickListener != null) {
-                onItemClickListener.onItemClick(name);
-            }
-        });
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(name));
     }
 
     @Override
@@ -60,9 +55,7 @@ public class NameAdapter extends RecyclerView.Adapter<NameAdapter.ViewHolder> {
         notifyDataSetChanged();
     }
 
-    public String getSelectedName() {
-        return selectedName;
-    }
+
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView nameTextView;
