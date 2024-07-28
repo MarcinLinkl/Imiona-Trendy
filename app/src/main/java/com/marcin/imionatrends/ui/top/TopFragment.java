@@ -3,6 +3,7 @@ package com.marcin.imionatrends.ui.top;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,21 +16,17 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.marcin.imionatrends.R;
-import com.marcin.imionatrends.data.DatabaseHelper;
 import com.marcin.imionatrends.databinding.FragmentTopBinding;
 
+import java.util.List;
 
 public class TopFragment extends Fragment {
 
     private FragmentTopBinding binding;
     private TopViewModel topViewModel;
-    private RecyclerView recyclerView;
     private GivenFirstNameDataAdapter givenFirstNameDataAdapter;
-    private Spinner genderSpinner, yearSpinner;
-    private EditText searchEditText;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -37,97 +34,117 @@ public class TopFragment extends Fragment {
         binding = FragmentTopBinding.inflate(inflater, container, false);
         View root = binding.getRoot(); // Use inflated binding root
 
-        recyclerView = binding.recyclerView;
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        givenFirstNameDataAdapter = new GivenFirstNameDataAdapter();
-        recyclerView.setAdapter(givenFirstNameDataAdapter);
-
-        genderSpinner = binding.genderSpinner;
-        yearSpinner = binding.yearSpinner;
-        searchEditText = binding.searchEditText;
-
         // Set up ViewModel
         topViewModel = new ViewModelProvider(this).get(TopViewModel.class);
+        binding.setViewModel(topViewModel);
+        binding.setLifecycleOwner(getViewLifecycleOwner()); // Use view lifecycle owner for better lifecycle handling
 
-        // Set up gender spinner
-        ArrayAdapter<CharSequence> genderAdapter = ArrayAdapter.createFromResource(requireContext(),
-                R.array.gender_options, android.R.layout.simple_spinner_item);
-        genderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        genderSpinner.setAdapter(genderAdapter);
+        // Setup RecyclerView
+        setupRecyclerView();
 
-        // Set up year spinner
-        DatabaseHelper dbHelper = new DatabaseHelper(requireContext());
-        ArrayAdapter<Integer> yearAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_item, dbHelper.getYears());
-        yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        yearSpinner.setAdapter(yearAdapter);
-
-        // Observe data from ViewModel
-        topViewModel.getFirstNameData().observe(getViewLifecycleOwner(), firstNameData -> {
-            // Update data in adapter
-            givenFirstNameDataAdapter.setData(firstNameData);
-        });
-
-        // Set up search functionality
-        searchEditText.addTextChangedListener(new SimpleTextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {
-                filterData();
-            }
-        });
-
-        genderSpinner.setOnItemSelectedListener(new SimpleItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                filterData();
-            }
-        });
-
-        yearSpinner.setOnItemSelectedListener(new SimpleItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                filterData();
-            }
-        });
+        // Setup observers and listeners
+        setupObservers();
+        setupListeners();
+        setupYearSpinner();
 
         return root;
     }
 
-    private void filterData() {
-        String query = searchEditText.getText().toString().trim();
-        String gender = genderSpinner.getSelectedItem().toString();
-        String year = yearSpinner.getSelectedItem().toString();
-        topViewModel.filterData(query, gender, year);
+    private void setupRecyclerView() {
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        topViewModel.getFirstNameData().observe(getViewLifecycleOwner(), firstNameData -> {
+            if (firstNameData != null) {
+                if (givenFirstNameDataAdapter == null) {
+                    givenFirstNameDataAdapter = new GivenFirstNameDataAdapter();
+                    binding.recyclerView.setAdapter(givenFirstNameDataAdapter);
+                } else {
+                    givenFirstNameDataAdapter.setData(firstNameData);
+                }
+
+                // Handle visibility
+                if (firstNameData.isEmpty()) {
+                    binding.recyclerView.setVisibility(View.GONE);
+                    binding.emptyView.setVisibility(View.VISIBLE);
+                } else {
+                    binding.recyclerView.setVisibility(View.VISIBLE);
+                    binding.emptyView.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
-    // TextWatcher implementation
-    private abstract static class SimpleTextWatcher implements TextWatcher {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            // Not needed, but required by the interface
-        }
+    private void setupYearSpinner() {
+        topViewModel.getYears().observe(getViewLifecycleOwner(), years -> {
+            if (years != null) {
+                ArrayAdapter<Integer> yearAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, years);
+                yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                binding.yearSpinner.setAdapter(yearAdapter);
 
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            // Not needed, but required by the interface
-        }
-
-        @Override
-        public abstract void afterTextChanged(Editable s);
+                // Ustaw domyślny rok na pierwszą wartość w spinnerze
+                if (!years.isEmpty()) {
+                    binding.yearSpinner.setSelection(0);
+                    topViewModel.updateYear(years.get(0).toString());
+                }
+            }
+        });
     }
 
-    // AdapterView.OnItemSelectedListener implementation
-    private abstract static class SimpleItemSelectedListener implements AdapterView.OnItemSelectedListener {
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-            // Not needed, but required by the interface
-        }
+    private void setupObservers() {
+        topViewModel.getFirstNameData().observe(getViewLifecycleOwner(), firstNameData -> {
+            if (givenFirstNameDataAdapter != null) {
+                givenFirstNameDataAdapter.setData(firstNameData);
+            }
+        });
+    }
+
+    private void setupListeners() {
+        binding.searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // No action needed
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                topViewModel.filterData(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // No action needed
+            }
+        });
+
+        binding.genderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedGender = (String) parent.getItemAtPosition(position);
+                topViewModel.updateGender(selectedGender);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // No action needed
+            }
+        });
+
+        binding.yearSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Integer selectedYear = (Integer) parent.getItemAtPosition(position);
+                topViewModel.updateYear(selectedYear.toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // No action needed
+            }
+        });
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+        binding = null; // Clean up binding to avoid memory leaks
     }
 }
-

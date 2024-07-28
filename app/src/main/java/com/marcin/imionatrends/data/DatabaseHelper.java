@@ -302,6 +302,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
 
+        // Validate inputs
+        if (year == null || year.trim().isEmpty()) {
+            Log.e("DatabaseHelper", "Year is null or empty");
+            return data; // Return empty list if year is invalid
+        }
+
+        if (gender == null) {
+            gender = "Wszyscy"; // Default to 'Wszyscy' if gender is null
+        }
+
         // Define gender filter
         String genderFilter = null;
         switch (gender) {
@@ -317,6 +327,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 genderFilter = "0";
                 Log.d("DatabaseHelper", "Gender filter set to 'Kobiety'");
                 break;
+            default:
+                Log.e("DatabaseHelper", "Unrecognized gender filter: " + gender);
+                return data; // Return empty list for unrecognized gender
         }
 
         try {
@@ -352,6 +365,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return data;
     }
+
 
 
 

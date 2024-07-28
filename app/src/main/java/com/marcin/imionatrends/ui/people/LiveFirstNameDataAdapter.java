@@ -1,5 +1,6 @@
 package com.marcin.imionatrends.ui.people;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,17 +14,7 @@ import java.util.List;
 
 public class LiveFirstNameDataAdapter extends RecyclerView.Adapter<LiveFirstNameDataAdapter.ViewHolder> {
     private List<LiveFirstNameData> liveFirstNameData;
-    private List<LiveFirstNameData> originalData; // Keep reference to original data
-
-    public LiveFirstNameDataAdapter(List<LiveFirstNameData> liveFirstNameData, List<LiveFirstNameData> originalData) {
-        this.liveFirstNameData = liveFirstNameData;
-        this.originalData = originalData;
-    }
-
-    public void setLiveFirstNameData(List<LiveFirstNameData> liveFirstNameData) {
-        this.liveFirstNameData = liveFirstNameData;
-        notifyDataSetChanged();
-    }
+    private List<LiveFirstNameData> originalLiveFirstNameData; // Keep reference to original data
 
     @NonNull
     @Override
@@ -32,15 +23,32 @@ public class LiveFirstNameDataAdapter extends RecyclerView.Adapter<LiveFirstName
                 .inflate(R.layout.item_live_first_name_data, parent, false);
         return new ViewHolder(view);
     }
-
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         LiveFirstNameData data = liveFirstNameData.get(position);
-        holder.orderNumber.setText(String.valueOf(originalData.indexOf(data) + 1)); // Use originalData for order
+        holder.orderNumber.setText(String.valueOf(originalLiveFirstNameData.indexOf(data) + 1)); // Use originalData for order
         holder.firstName.setText(data.getName());
         holder.count.setText(String.valueOf(data.getCount()));
         holder.percentage.setText(String.format("%.2f%%", (data.getPercentage())));
     }
+
+    public LiveFirstNameDataAdapter(List<LiveFirstNameData> liveFirstNameData, List<LiveFirstNameData> originalData) {
+        this.liveFirstNameData = liveFirstNameData;
+        this.originalLiveFirstNameData = originalData;
+    }
+
+    // Method to update the data
+    public void updateData(List<LiveFirstNameData> newData) {
+        Log.d("LiveFirstNameDataAdapter", "Data updated: " + newData);
+        this.liveFirstNameData = newData;
+        notifyDataSetChanged();
+    }
+    // Method to update the original data
+    public void updateOriginalData(List<LiveFirstNameData> originalData) {
+        Log.d("LiveFirstNameDataAdapter", "Updating original data: " + originalData);
+        this.originalLiveFirstNameData = originalData;
+    }
+
 
     @Override
     public int getItemCount() {

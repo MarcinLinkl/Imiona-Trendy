@@ -1,5 +1,6 @@
 package com.marcin.imionatrends.ui.top;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import java.util.List;
 public class GivenFirstNameDataAdapter extends RecyclerView.Adapter<GivenFirstNameDataAdapter.NameViewHolder> {
 
     private List<GivenFirstNameData> dataList = new ArrayList<>();
+    private List<GivenFirstNameData> originalDataList = new ArrayList<>();
 
     @NonNull
     @Override
@@ -33,11 +35,17 @@ public class GivenFirstNameDataAdapter extends RecyclerView.Adapter<GivenFirstNa
         holder.countTextView.setText(String.valueOf(data.getCount()));
         holder.percentageTextView.setText(String.format("%.2f%%", data.getPercentage()));
     }
-
-    @Override
-    public int getItemCount() {
-        return dataList.size();
+    public void updateData(List<GivenFirstNameData> newData)
+    {
+        Log.d("updateData", "newData"+ newData);
+        this.dataList = newData;
+        notifyDataSetChanged();
     }
+    public void updateOriginalData(List<GivenFirstNameData> originalData) {
+        Log.d("updateOriginalData", "originalData"+ originalData);
+        this.originalDataList = originalData;
+    }
+
 
     public void setData(List<GivenFirstNameData> data) {
         this.dataList.clear();
@@ -45,6 +53,12 @@ public class GivenFirstNameDataAdapter extends RecyclerView.Adapter<GivenFirstNa
             this.dataList.addAll(data);
         }
         notifyDataSetChanged();
+    }
+
+
+    @Override
+    public int getItemCount() {
+        return dataList.size();
     }
 
     static class NameViewHolder extends RecyclerView.ViewHolder {

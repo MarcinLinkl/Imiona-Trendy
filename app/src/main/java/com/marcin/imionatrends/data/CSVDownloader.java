@@ -30,10 +30,17 @@ public class CSVDownloader {
     private static final int TIMEOUT = 2;
 
     public static void downloadCsvData(Context context, Runnable onSuccessInsertingData, Runnable onFailureInsertingData, Runnable onDataMissing, Runnable onDataFull) {
+        DatabaseHelper dbHelper = new DatabaseHelper(context);
+        // Check if first name data already exists
+        if (!dbHelper.isFirstNameDataEmpty() && !dbHelper.isLiveFirstNameDataEmpty()) {
+            onDataFull.run();
+            return;
+        }
+        onDataMissing.run();
+
         new Thread(() -> {
             long startTime = System.currentTimeMillis();
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            DatabaseHelper dbHelper = new DatabaseHelper(context);
             try {
                 // Check if first name data already exists
                 if (dbHelper.isFirstNameDataEmpty() || dbHelper.isLiveFirstNameDataEmpty()) {
