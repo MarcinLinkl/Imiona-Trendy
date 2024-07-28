@@ -64,7 +64,7 @@ public class PeopleFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                filterData();
+                peopleViewModel.filterData(s.toString());
             }
 
             @Override
@@ -74,19 +74,13 @@ public class PeopleFragment extends Fragment {
         genderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                filterData();
+                String selectedGender = (String) parent.getItemAtPosition(position);
+                peopleViewModel.updateGender(selectedGender);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
-
         return root;
-    }
-
-    private void filterData() {
-        String query = searchEditText.getText().toString();
-        String gender = genderSpinner.getSelectedItem().toString();
-        peopleViewModel.filterData(query, gender);
     }
 }

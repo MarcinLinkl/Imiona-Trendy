@@ -436,5 +436,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return new LineData(dataSet);
     }
 
+    public List<LiveFirstNameData> getAllLiveFirstNameDataByGender(String gender) {
+
+        String condition = gender.equals("Wszyscy") ? "" : " where is_male = " + (gender.equals("Mężczyźni") ? "1" : "0");
+        String query = "SELECT * FROM " + TABLE_LIVE_FIRST_NAME_DATA + condition + " order by 3 desc";
+
+        List<LiveFirstNameData> liveFirstNameDatas = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+        if (cursor.moveToFirst()) {
+            do {
+                LiveFirstNameData liveFirstNameData = new LiveFirstNameData(
+                        cursor.getString(cursor.getColumnIndexOrThrow(KEY_LIVE_NAME)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(KEY_LIVE_COUNT)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(KEY_IS_MALE_LIVE)),
+                        cursor.getFloat(cursor.getColumnIndexOrThrow(KEY_LIVE_PERCENTAGE))
+                );
+                liveFirstNameDatas.add(liveFirstNameData);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return liveFirstNameDatas;
+    }
 }
 
