@@ -10,12 +10,15 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.marcin.imionatrends.R;
+
 import java.util.ArrayList;
 
 public class PeopleFragment extends Fragment {
@@ -37,8 +40,6 @@ public class PeopleFragment extends Fragment {
         genderSpinner = root.findViewById(R.id.gender_spinner);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new LiveFirstNameDataAdapter(new ArrayList<>());
-        recyclerView.setAdapter(adapter);
 
         peopleViewModel = new ViewModelProvider(this, new ViewModelProvider.AndroidViewModelFactory(requireActivity().getApplication())).get(PeopleViewModel.class);
 
@@ -46,7 +47,11 @@ public class PeopleFragment extends Fragment {
             if (liveFirstNameData != null && !liveFirstNameData.isEmpty()) {
                 recyclerView.setVisibility(View.VISIBLE);
                 emptyView.setVisibility(View.GONE);
-                adapter.setLiveFirstNameData(liveFirstNameData);
+                // Use originalLiveFirstNameData to initialize the adapter
+                peopleViewModel.getOriginalLiveFirstNameData().observe(getViewLifecycleOwner(), originalData -> {
+                    adapter = new LiveFirstNameDataAdapter(liveFirstNameData, originalData);
+                    recyclerView.setAdapter(adapter);
+                });
             } else {
                 recyclerView.setVisibility(View.GONE);
                 emptyView.setVisibility(View.VISIBLE);

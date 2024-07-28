@@ -2,6 +2,7 @@ package com.marcin.imionatrends.data;
 
 
 public class LiveFirstNameData {
+    private String orderID;
     private String name;
     private int count;
     private int isMale;
@@ -16,6 +17,14 @@ public class LiveFirstNameData {
     public LiveFirstNameData(String name, int count, int isMale) {
         this.name = name;
         this.count = count;
+        this.isMale = isMale;
+    }
+
+    public LiveFirstNameData(String orderID, String name, int count, float percentage, int isMale) {
+        this.orderID = orderID;
+        this.name = name;
+        this.count = count;
+        this.percentage = percentage;
         this.isMale = isMale;
     }
 

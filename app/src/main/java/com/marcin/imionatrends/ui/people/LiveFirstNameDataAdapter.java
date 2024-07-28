@@ -8,22 +8,22 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.marcin.imionatrends.R;
 import com.marcin.imionatrends.data.LiveFirstNameData;
+
 import java.util.List;
 
 public class LiveFirstNameDataAdapter extends RecyclerView.Adapter<LiveFirstNameDataAdapter.ViewHolder> {
     private List<LiveFirstNameData> liveFirstNameData;
+    private List<LiveFirstNameData> originalData; // Keep reference to original data
 
-
-    public LiveFirstNameDataAdapter(List<LiveFirstNameData> liveFirstNameData) {
+    public LiveFirstNameDataAdapter(List<LiveFirstNameData> liveFirstNameData, List<LiveFirstNameData> originalData) {
         this.liveFirstNameData = liveFirstNameData;
-
+        this.originalData = originalData;
     }
 
     public void setLiveFirstNameData(List<LiveFirstNameData> liveFirstNameData) {
         this.liveFirstNameData = liveFirstNameData;
         notifyDataSetChanged();
     }
-
 
     @NonNull
     @Override
@@ -36,7 +36,7 @@ public class LiveFirstNameDataAdapter extends RecyclerView.Adapter<LiveFirstName
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         LiveFirstNameData data = liveFirstNameData.get(position);
-        holder.orderNumber.setText(String.valueOf(position + 1));
+        holder.orderNumber.setText(String.valueOf(originalData.indexOf(data) + 1)); // Use originalData for order
         holder.firstName.setText(data.getName());
         holder.count.setText(String.valueOf(data.getCount()));
         holder.percentage.setText(String.format("%.2f%%", (data.getPercentage())));
