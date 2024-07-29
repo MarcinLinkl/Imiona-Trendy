@@ -1,99 +1,149 @@
 package com.marcin.imionatrends.ui.charts;
 
+import android.app.Application;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Switch;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.marcin.imionatrends.R;
+import com.marcin.imionatrends.databinding.FragmentChartsBinding;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.LineData;
-import com.marcin.imionatrends.databinding.FragmentChartsBinding;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ChartsFragment extends Fragment {
 
     private FragmentChartsBinding binding;
     private ChartsViewModel chartsViewModel;
-    private NameAdapter nameAdapter;
-    private List<String> selectedNames = new ArrayList<>();
+    private LineChart lineChart;
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        chartsViewModel = new ViewModelProvider(this).get(ChartsViewModel.class);
-
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentChartsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        EditText searchEditText = binding.searchEditText;
-        RecyclerView recyclerView = binding.recyclerView;
-        LineChart lineChart = binding.lineChart;
-        Switch chartSwitch = binding.chartSwitch;
+        // Set up ViewModel
+        chartsViewModel = new ViewModelProvider(this).get(ChartsViewModel.class);
+        binding.setViewModel(chartsViewModel);
+        binding.setLifecycleOwner(getViewLifecycleOwner());
 
-        // Initialize adapter with item click listener
-        // Handle item click: update chart data
-        NameAdapter adapter = new NameAdapter(this::updateChartForName);
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext())); // Set LayoutManager
+        // Initialize LineChart
+        lineChart = binding.lineChart;
 
-        searchEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // No action needed
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                chartsViewModel.setSearchQuery(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                // No action needed
-            }
-        });
-
-        chartSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            chartsViewModel.setIsPercentage(isChecked); // Update percentage mode
-
-
-
-        });
-
-        // Observe LiveData from ViewModel and update UI accordingly
-        chartsViewModel.getSearchResults().observe(getViewLifecycleOwner(), searchResults -> {
-            adapter.setData(searchResults);
-        });
-
-        chartsViewModel.getChartData().observe(getViewLifecycleOwner(), chartData -> {
-            // Update LineChart with new data
-            lineChart.setData(chartData); // Set data to the chart
-            lineChart.invalidate(); // Refresh the chart
-        });
+        // Setup observers and listeners
+        setupObservers();
+        setupListeners();
+        setupSpinner();
 
         return root;
     }
 
-    private void updateChartForName(String name) {
-        // Fetch chart data for the selected name with current mode
-        chartsViewModel.updateChartData(name);
+    private void setupObservers() {
+        chartsViewModel.getUniqueNames().observe(getViewLifecycleOwner(), names -> {
+            if (names != null) {
+                setupSpinnerAdapter(names);
+            }
+        });
+
+        chartsViewModel.getChartData().observe(getViewLifecycleOwner(), lineData -> {
+            if (lineData != null) {
+                lineChart.setData(lineData);
+
+                // Customize the X-axis to display years without commas
+                XAxis xAxis = lineChart.getXAxis();
+                xAxis.setValueFormatter(new ValueFormatter() {
+                    @Override
+                    public String getFormattedValue(float value) {
+                        // Format the x value to be a year (e.g., 2020 instead of 2020.0)
+                        return String.format("%d", (int) value);
+                    }
+                });
+
+                lineChart.invalidate(); // Refresh the chart
+            }
+        });
     }
+
+    private void setupListeners() {
+        binding.switchPercentage.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            chartsViewModel.setPercentageValue(isChecked);
+        });
+
+
+    }
+
+    private void setupSpinner() {
+        binding.nameSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedName = (String) parent.getItemAtPosition(position);
+                chartsViewModel.addNameToChart(selectedName);
+                addChipToGroup(selectedName);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // No action needed
+            }
+        });
+    }
+
+    private void setupSpinnerAdapter(List<String> names) {
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, names);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.nameSpinner.setAdapter(spinnerAdapter);
+    }
+
+    private void addChipToGroup(String name) {
+        if (binding.chipGroup.findViewWithTag(name) == null) {
+            Chip chip = new Chip(getContext());
+            chip.setText(name);
+            chip.setTag(name);
+            chip.setCloseIconVisible(true);
+            chip.setOnCloseIconClickListener(v -> {
+                binding.chipGroup.removeView(chip);
+                chartsViewModel.removeNameFromChart(name);
+            });
+            binding.chipGroup.addView(chip);
+        }
+    }
+
+    private void styleLineChart() {
+        // Customize line chart appearance
+        lineChart.getDescription().setEnabled(false);
+        lineChart.setDrawGridBackground(false);
+        lineChart.setDrawBorders(false);
+
+        lineChart.getXAxis().setTextColor(ContextCompat.getColor(getContext(), R.color.line_chart_axis_color));
+        lineChart.getAxisLeft().setTextColor(ContextCompat.getColor(getContext(), R.color.line_chart_axis_color));
+        lineChart.getAxisRight().setTextColor(ContextCompat.getColor(getContext(), R.color.line_chart_axis_color));
+
+        lineChart.getXAxis().setDrawGridLines(false);
+        lineChart.getAxisLeft().setDrawGridLines(true);
+        lineChart.getAxisLeft().setGridColor(ContextCompat.getColor(getContext(), R.color.line_chart_grid_color));
+        lineChart.getAxisLeft().setGridLineWidth(1f);
+        lineChart.getLegend().setTextColor(ContextCompat.getColor(getContext(), R.color.line_chart_legend_color));
+    }
+
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+        binding = null; // Clean up binding to avoid memory leaks
     }
 }

@@ -11,6 +11,7 @@ import android.util.Log;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 
