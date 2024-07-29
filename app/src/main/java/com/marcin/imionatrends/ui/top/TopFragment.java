@@ -54,7 +54,9 @@ public class TopFragment extends Fragment {
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new GivenFirstNameDataAdapter();
         binding.recyclerView.setAdapter(adapter);
-        topViewModel.getFirstNameData().observe(getViewLifecycleOwner(), firstNameData -> {
+
+        topViewModel.getGivenFirstNameData().observe(getViewLifecycleOwner(), firstNameData -> {
+            Log.d("TopFragment", "Data observed: " + firstNameData); // Log the observed data
             if (firstNameData != null) {
                 adapter.updateData(firstNameData);
                 // Handle visibility
@@ -71,6 +73,7 @@ public class TopFragment extends Fragment {
 
     private void setupYearSpinner() {
         topViewModel.getYears().observe(getViewLifecycleOwner(), years -> {
+            Log.d("TopFragment", "Years observed: " + years); // Log the observed years
             if (years != null) {
                 ArrayAdapter<Integer> yearAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, years);
                 yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -79,16 +82,33 @@ public class TopFragment extends Fragment {
                 // Ustaw domyślny rok na pierwszą wartość w spinnerze
                 if (!years.isEmpty()) {
                     binding.yearSpinner.setSelection(0);
-                    topViewModel.updateYear(years.get(0).toString());
+                    topViewModel.updateYear(years.get(0).toString()); // Load data for default year
                 }
             }
         });
     }
 
     private void setupObservers() {
-        topViewModel.getFirstNameData().observe(getViewLifecycleOwner(), firstNameData -> {
+        topViewModel.getGivenFirstNameData().observe(getViewLifecycleOwner(), firstNameData -> {
+            Log.d("TopFragment", "Data observed: " + firstNameData); // Log the observed data
             if (adapter != null) {
-                adapter.setData(firstNameData);
+                adapter.updateData(firstNameData);
+            }
+            // Handle visibility
+            if (firstNameData != null) {
+                if (firstNameData.isEmpty()) {
+                    binding.recyclerView.setVisibility(View.GONE);
+                    binding.emptyView.setVisibility(View.VISIBLE);
+                } else {
+                    binding.recyclerView.setVisibility(View.VISIBLE);
+                    binding.emptyView.setVisibility(View.GONE);
+                }
+            }
+        });
+        topViewModel.getOriginalGivenFirstNameData().observe(getViewLifecycleOwner(), originalData -> {
+            Log.d("TopFragment", "Original data observed: " + originalData); // Log the observed original data
+            if (adapter != null) {
+                adapter.updateOriginalData(originalData);
             }
         });
     }
@@ -102,7 +122,8 @@ public class TopFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                topViewModel.filterData(s.toString());
+                Log.d("TopFragment", "Search query: " + s.toString()); // Log the search query
+                topViewModel.filterData(s.toString()); // Update search query in ViewModel
             }
 
             @Override
@@ -115,7 +136,8 @@ public class TopFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selectedGender = (String) parent.getItemAtPosition(position);
-                topViewModel.updateGender(selectedGender);
+                Log.d("TopFragment", "Gender selected: " + selectedGender); // Log the selected gender
+                topViewModel.updateGender(selectedGender); // Update gender in ViewModel
             }
 
             @Override
@@ -128,7 +150,8 @@ public class TopFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Integer selectedYear = (Integer) parent.getItemAtPosition(position);
-                topViewModel.updateYear(selectedYear.toString());
+                Log.d("TopFragment", "Year selected: " + selectedYear); // Log the selected year
+                topViewModel.updateYear(selectedYear.toString()); // Update year in ViewModel
             }
 
             @Override

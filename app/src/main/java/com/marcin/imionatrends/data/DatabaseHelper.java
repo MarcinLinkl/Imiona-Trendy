@@ -336,7 +336,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String query;
             String[] selectionArgs;
             if (genderFilter == null) {
-                query = "SELECT name, count, percentage FROM " + TABLE_GIVEN_FIRST_NAME_DATA + " WHERE year = ?";
+                query = "SELECT name, count, percentage FROM " + TABLE_GIVEN_FIRST_NAME_DATA + " WHERE year = ? ORDER BY 3 DESC";
                 selectionArgs = new String[]{year};
             } else {
                 query = "SELECT name, count, percentage FROM " + TABLE_GIVEN_FIRST_NAME_DATA + " WHERE year = ? AND is_male = ?";

@@ -30,7 +30,8 @@ public class GivenFirstNameDataAdapter extends RecyclerView.Adapter<GivenFirstNa
     @Override
     public void onBindViewHolder(@NonNull NameViewHolder holder, int position) {
         GivenFirstNameData data = dataList.get(position);
-        holder.rankTextView.setText(String.valueOf(position + 1));
+        int orderIndex = originalDataList.indexOf(data) + 1;
+        holder.orderNumber.setText(String.valueOf(orderIndex));
         holder.nameTextView.setText(data.getName());
         holder.countTextView.setText(String.valueOf(data.getCount()));
         holder.percentageTextView.setText(String.format("%.2f%%", data.getPercentage()));
@@ -63,14 +64,14 @@ public class GivenFirstNameDataAdapter extends RecyclerView.Adapter<GivenFirstNa
 
     static class NameViewHolder extends RecyclerView.ViewHolder {
 
-        TextView rankTextView;
+        TextView orderNumber;
         TextView nameTextView;
         TextView countTextView;
         TextView percentageTextView;
 
         NameViewHolder(@NonNull View itemView) {
             super(itemView);
-            rankTextView = itemView.findViewById(R.id.order_number);
+            orderNumber = itemView.findViewById(R.id.order_number);
             nameTextView = itemView.findViewById(R.id.first_name);
             countTextView = itemView.findViewById(R.id.count);
             percentageTextView = itemView.findViewById(R.id.percentage);
