@@ -20,13 +20,6 @@ public class LiveFirstNameData {
         this.isMale = isMale;
     }
 
-    public LiveFirstNameData(String orderID, String name, int count, float percentage, int isMale) {
-        this.orderID = orderID;
-        this.name = name;
-        this.count = count;
-        this.percentage = percentage;
-        this.isMale = isMale;
-    }
 
     public String getName() {
         return name;
@@ -40,17 +33,13 @@ public class LiveFirstNameData {
         return count;
     }
 
-    public void setCount(int count) {
-        this.count = count;
-    }
+
 
     public int getIsMale() {
         return isMale;
     }
 
-    public void setIsMale(int isMale) {
-        this.isMale = isMale;
-    }
+
 
     public float getPercentage() {
         return percentage;

@@ -8,13 +8,6 @@ public class GivenFirstNameData {
     private int isMale;
     private double percentage;
 
-    public GivenFirstNameData(String name, int count, int isMale, double percentage) {
-
-        this.name = name;
-        this.count = count;
-        this.isMale = isMale;
-        this.percentage = percentage;
-    }
     public GivenFirstNameData(String name, int count, double percentage) {
 
         this.name = name;
@@ -26,7 +19,7 @@ public class GivenFirstNameData {
         this.name = name;
         this.count = count;
         this.isMale = isMale;
-        this.percentage = percentage;
+
     }
 
 
@@ -50,7 +43,5 @@ public class GivenFirstNameData {
         return percentage;
     }
 
-    public void setPercentage(double percentage) {
-        this.percentage = percentage;
-    }
+
 }

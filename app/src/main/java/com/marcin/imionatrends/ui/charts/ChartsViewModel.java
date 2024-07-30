@@ -29,10 +29,12 @@ public class ChartsViewModel extends AndroidViewModel {
 
     private final List<String> namesInChart = new ArrayList<>();
     private boolean isPercentageValue = false;
+
     // Lista kolorów do przypisania do wykresów
     private static final int[] COLORS = {
             Color.BLUE, Color.RED, Color.GREEN, Color.MAGENTA, Color.CYAN, Color.YELLOW
     };
+
     public ChartsViewModel(@NonNull Application application) {
         super(application);
         databaseHelper = new DatabaseHelper(application);
@@ -75,20 +77,23 @@ public class ChartsViewModel extends AndroidViewModel {
         updateChartData();
     }
 
+    public void resetChartData() {
+        namesInChart.clear();
+        updateChartData();
+    }
 
-    private void updateChartData() {
+    void updateChartData() {
         executorService.execute(() -> {
             LineData combinedLineData = new LineData();
             int colorIndex = 0;
+
             for (String name : namesInChart) {
                 LineData lineData = databaseHelper.getChartDataForName(name, isPercentageValue);
                 if (lineData != null) {
-                    // Add all datasets from the lineData to the combinedLineData
                     for (int i = 0; i < lineData.getDataSetCount(); i++) {
                         LineDataSet dataSet = (LineDataSet) lineData.getDataSetByIndex(i);
-                        // Set the label to the name
                         dataSet.setLabel(name);
-                        // Set a color for the dataset
+
                         if (colorIndex >= COLORS.length) {
                             colorIndex = 0; // Wrap around if there are more datasets than colors
                         }
