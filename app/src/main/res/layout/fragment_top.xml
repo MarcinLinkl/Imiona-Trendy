@@ -12,16 +12,22 @@
         android:orientation="vertical"
         android:padding="28dp">
 
-        <!-- Search EditText -->
-        <EditText
-            android:id="@+id/search_edit_text"
+        <!-- Search EditText with TextInputLayout for better styling -->
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
             android:hint="Szukaj imienia"
-            android:minHeight="58dp"
-            android:padding="0dp"
-            android:inputType="text" />
+            android:labelFor="@id/search_edit_text">
+
+            <EditText
+                android:id="@+id/search_edit_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:minHeight="58dp"
+                android:inputType="text"
+                android:contentDescription="Search for a name" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Gender Spinner -->
         <Spinner
@@ -29,6 +35,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
+            android:contentDescription="Select gender"
             android:entries="@array/gender_options" />
 
         <!-- Year Spinner -->
@@ -37,21 +44,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-          />
+            android:contentDescription="Select year" />
 
+        <!-- Empty view to indicate no data -->
         <TextView
             android:id="@+id/empty_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="No data available"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:contentDescription="No data available message" />
 
+        <!-- RecyclerView for displaying list data -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:contentDescription="List of items" />
 
-   </LinearLayout>
+    </LinearLayout>
 </layout>

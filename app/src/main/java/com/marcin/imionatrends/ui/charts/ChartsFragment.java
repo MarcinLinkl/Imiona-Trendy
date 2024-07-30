@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
@@ -44,7 +43,7 @@ public class ChartsFragment extends Fragment {
         // Setup observers and listeners
         setupObservers();
         setupListeners();
-        setupSpinner();
+        setupAutoCompleteTextView(); // Set up AutoCompleteTextView
         styleLineChart();
         return root;
     }
@@ -52,7 +51,7 @@ public class ChartsFragment extends Fragment {
     private void setupObservers() {
         chartsViewModel.getUniqueNames().observe(getViewLifecycleOwner(), names -> {
             if (names != null) {
-                setupSpinnerAdapter(names);
+                setupAutoCompleteTextViewAdapter(names); // Set up AutoCompleteTextView adapter
             }
         });
 
@@ -81,26 +80,17 @@ public class ChartsFragment extends Fragment {
         });
     }
 
-    private void setupSpinner() {
-        binding.nameSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedName = (String) parent.getItemAtPosition(position);
-                chartsViewModel.addNameToChart(selectedName);
-                addChipToGroup(selectedName);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // No action needed
-            }
+    private void setupAutoCompleteTextView() {
+        binding.nameAutoCompleteTextView.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedName = (String) parent.getItemAtPosition(position);
+            chartsViewModel.addNameToChart(selectedName);
+            addChipToGroup(selectedName);
         });
     }
 
-    private void setupSpinnerAdapter(List<String> names) {
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, names);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        binding.nameSpinner.setAdapter(spinnerAdapter);
+    private void setupAutoCompleteTextViewAdapter(List<String> names) {
+        ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_dropdown_item_1line, names);
+        binding.nameAutoCompleteTextView.setAdapter(autoCompleteAdapter);
     }
 
     private void addChipToGroup(String name) {
@@ -125,8 +115,8 @@ public class ChartsFragment extends Fragment {
 
         lineChart.getXAxis().setTextColor(ContextCompat.getColor(getContext(), R.color.line_chart_axis_color));
         lineChart.getAxisLeft().setTextColor(ContextCompat.getColor(getContext(), R.color.line_chart_axis_color));
-        lineChart.getAxisRight().setTextColor(ContextCompat.getColor(getContext(), R.color.line_chart_axis_color));
 
+        lineChart.getAxisRight().setEnabled(false);
         lineChart.getXAxis().setDrawGridLines(false);
         lineChart.getAxisLeft().setDrawGridLines(true);
         lineChart.getAxisLeft().setGridColor(ContextCompat.getColor(getContext(), R.color.line_chart_grid_color));
@@ -143,7 +133,6 @@ public class ChartsFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-
         super.onDestroyView();
         chartsViewModel.resetChartData(); // Reset chart data when fragment is destroyed
         binding = null; // Clean up binding to avoid memory leaks
